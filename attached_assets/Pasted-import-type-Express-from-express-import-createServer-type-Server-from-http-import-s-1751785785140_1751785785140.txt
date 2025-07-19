@@ -1,0 +1,882 @@
+import type { Express } from "express";
+import { createServer, type Server } from "http";
+import { storage } from "./production-switch";
+import { insertEmailSchema, updateEmailSchema, insertFolderSchema, updateFolderSchema, updateUserSchema, insertEmailTagSchema, insertAliasSchema, updateAliasSchema } from "@shared/schema";
+import bcrypt from "bcrypt";
+import { z } from "zod";
+import { ipBlocker } from "./ip-blocker";
+import { requireAuth, hashPassword, verifyPassword, createUserSession, clearUserSession } from "./auth-middleware";
+import session from "express-session";
+import MemoryStore from "memorystore";
+
+const sessionMemoryStore = MemoryStore(session);
+
+// Auth schemas
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string(),
+});
+
+const registerSchema = z.object({
+  email: z.string().email(),
+  firstName: z.string().min(2),
+  lastName: z.string().min(2),
+  password: z.string().min(6),
+  captcha: z.string(),
+  captchaAnswer: z.number(),
+  captchaNum1: z.number(),
+  captchaNum2: z.number(),
+});
+
+// IP blocking middleware
+function checkIPBlock(req: any, res: any, next: any) {
+  const clientIP = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || 'unknown';
+  const blockStatus = ipBlocker.isBlocked(clientIP);
+  
+  if (blockStatus.blocked) {
+    const minutes = blockStatus.timeLeft ? Math.ceil(blockStatus.timeLeft / 60) : 60;
+    return res.status(429).json({ 
+      message: `IP bloqueado. Tente novamente em ${minutes} minutos.`,
+      timeLeft: blockStatus.timeLeft
+    });
+  }
+  
+  next();
+}
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // Configure session middleware
+  app.use(session({
+    secret: process.env.SESSION_SECRET || 'fallback-secret-key-for-development',
+    store: new sessionMemoryStore({
+      checkPeriod: 86400000 // prune expired entries every 24h
+    }),
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+  }));
+
+  // Health check endpoint
+  app.get("/api/health", async (req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
+  // Authentication routes
+  app.get("/api/auth/status", async (req, res) => {
+    const clientIP = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || 'unknown';
+    const blockStatus = ipBlocker.isBlocked(clientIP);
+    const attempts = ipBlocker.getAttempts(clientIP);
+    
+    res.json({
+      blocked: blockStatus.blocked,
+      timeLeft: blockStatus.timeLeft,
+      attempts
+    });
+  });
+
+  app.post("/api/auth/login", checkIPBlock, async (req, res) => {
+    try {
+      const { email, password } = loginSchema.parse(req.body);
+      const clientIP = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || 'unknown';
+      
+      // Find user by email
+      const user = await storage.getUserByEmail(email);
+      
+      if (!user || !(await storage.verifyPassword(user.id, password))) {
+        // Track failed attempt
+        const result = ipBlocker.recordFailedAttempt(clientIP);
+        
+        if (result.blocked) {
+          return res.status(429).json({ 
+            message: "Muitas tentativas incorretas. IP bloqueado por 1 hora.",
+            blocked: true,
+            blockedUntil: result.blockedUntil
+          });
+        }
+        
+        return res.status(401).json({ 
+          message: "Credenciais inválidas",
+          attempts: result.attempts,
+          maxAttempts: 4
+        });
+      }
+      
+      // Clear attempts on successful login
+      ipBlocker.clearAttempts(clientIP);
+      
+      // Create session
+      const sessionUser = createUserSession(req, user);
+      
+      res.json({ 
+        message: "Login realizado com sucesso",
+        user: sessionUser
+      });
+      
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(400).json({ message: "Dados inválidos" });
+    }
+  });
+
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const { email, firstName, lastName, password, captcha, captchaAnswer, captchaNum1, captchaNum2 } = registerSchema.parse(req.body);
+      
+      // Validate math captcha
+      const correctAnswer = captchaNum1 + captchaNum2;
+      if (parseInt(captcha) !== correctAnswer) {
+        return res.status(400).json({ message: "Captcha incorreto" });
+      }
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({ message: "Conta já existente" });
+      }
+      
+      // Hash password
+      const hashedPassword = await hashPassword(password);
+      
+      // Create user
+      const newUser = await storage.createUser({
+        email,
+        firstName,
+        lastName,
+        password: hashedPassword,
+        storageUsed: 0,
+        storageQuota: 100 * 1024 * 1024, // 100MB
+      });
+      
+      res.status(201).json({ 
+        message: "Conta criada com sucesso",
+        user: { id: newUser.id, email: newUser.email, firstName: newUser.firstName, lastName: newUser.lastName }
+      });
+      
+    } catch (error) {
+      console.error('Register error:', error);
+      res.status(400).json({ message: "Erro ao criar conta" });
+    }
+  });
+
+  // Auth verification route
+  app.get("/api/auth/verify", async (req, res) => {
+    try {
+      const sessionUser = (req.session as any)?.user;
+      
+      if (!sessionUser || !sessionUser.id) {
+        return res.status(401).json({ message: 'Not authenticated' });
+      }
+
+      // Verify user still exists in database
+      const user = await storage.getUser(sessionUser.id);
+      if (!user) {
+        // Clear invalid session
+        (req.session as any).user = null;
+        return res.status(401).json({ message: 'User not found' });
+      }
+
+      res.json({ user: sessionUser });
+    } catch (error) {
+      console.error('Auth verify error:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Logout route
+  app.post("/api/auth/logout", async (req, res) => {
+    try {
+      clearUserSession(req);
+      res.json({ message: "Logout realizado com sucesso" });
+    } catch (error) {
+      console.error('Logout error:', error);
+      res.status(500).json({ message: "Erro no logout" });
+    }
+  });
+
+  // User routes
+  app.get("/api/user/:id", requireAuth, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.put("/api/user/:id", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const updateData = updateUserSchema.parse(req.body);
+      const user = await storage.updateUser(userId, updateData);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(user);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid request data" });
+    }
+  });
+
+  // User preferences route
+  app.put("/api/user/:id/preferences", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { language, theme, avatarShape, sidebarView } = req.body;
+      
+      const updateData = {
+        ...(language && { language }),
+        ...(theme && { theme }),
+        ...(avatarShape && { avatarShape }),
+        ...(sidebarView && { sidebarView }),
+      };
+      
+      const user = await storage.updateUser(userId, updateData);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(user);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid request data" });
+    }
+  });
+
+  app.put("/api/user/:id/password", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { currentPassword, newPassword } = req.body;
+      
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Current password and new password are required" });
+      }
+
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: "New password must be at least 8 characters long" });
+      }
+      
+      // Verify current password using bcrypt
+      const isCurrentPasswordValid = await storage.verifyPassword(userId, currentPassword);
+      if (!isCurrentPasswordValid) {
+        return res.status(401).json({ message: "Current password is incorrect" });
+      }
+      
+      // Update password with bcrypt hash
+      const success = await storage.updatePassword(userId, newPassword);
+      if (!success) {
+        return res.status(500).json({ message: "Failed to update password" });
+      }
+      
+      res.json({ message: "Password updated successfully" });
+    } catch (error) {
+      console.error('Password update error:', error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Folder routes
+  app.get("/api/folders/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const folders = await storage.getFolders(userId);
+      res.json(folders);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/folders/:userId/system/:systemType", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const systemType = req.params.systemType;
+      const folder = await storage.getSystemFolder(userId, systemType);
+      if (!folder) {
+        return res.status(404).json({ message: "System folder not found" });
+      }
+      res.json(folder);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/folders", async (req, res) => {
+    try {
+      const folderData = insertFolderSchema.parse(req.body);
+      
+      // Check if folder name already exists for this user
+      const existingFolders = await storage.getFolders(folderData.userId);
+      const folderExists = existingFolders.some(folder => 
+        folder.name.toLowerCase() === folderData.name.toLowerCase()
+      );
+      
+      if (folderExists) {
+        return res.status(409).json({ message: "Uma pasta com este nome já existe" });
+      }
+      
+      // Check if a tag with the same name exists for this user
+      const existingTags = await storage.getTags(folderData.userId);
+      const tagExists = existingTags.some(tag => 
+        tag.name.toLowerCase() === folderData.name.toLowerCase()
+      );
+      
+      if (tagExists) {
+        return res.status(409).json({ message: "Já existe uma tag com este nome" });
+      }
+      
+      const folder = await storage.createFolder(folderData);
+      res.json(folder);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid request data" });
+    }
+  });
+
+  app.put("/api/folders/:id", async (req, res) => {
+    try {
+      const folderId = parseInt(req.params.id);
+      const updateData = updateFolderSchema.parse(req.body);
+      
+      // If updating name, check for conflicts
+      if (updateData.name && typeof updateData.name === 'string') {
+        const currentFolder = await storage.getFolder(folderId);
+        if (!currentFolder) {
+          return res.status(404).json({ message: "Folder not found" });
+        }
+        
+        const newName = updateData.name.toLowerCase();
+        
+        // Check if another folder with this name exists (excluding current folder)
+        const existingFolders = await storage.getFolders(currentFolder.userId);
+        const folderExists = existingFolders.some(folder => 
+          folder.id !== folderId && folder.name.toLowerCase() === newName
+        );
+        
+        if (folderExists) {
+          return res.status(409).json({ message: "Uma pasta com este nome já existe" });
+        }
+        
+        // Check if a tag with the same name exists
+        const existingTags = await storage.getTags(currentFolder.userId);
+        const tagExists = existingTags.some(tag => 
+          tag.name.toLowerCase() === newName
+        );
+        
+        if (tagExists) {
+          return res.status(409).json({ message: "Já existe uma tag com este nome" });
+        }
+      }
+      
+      const folder = await storage.updateFolder(folderId, updateData);
+      if (!folder) {
+        return res.status(404).json({ message: "Folder not found" });
+      }
+      res.json(folder);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/folders/:id", async (req, res) => {
+    try {
+      const folderId = parseInt(req.params.id);
+      const success = await storage.deleteFolder(folderId);
+      if (!success) {
+        return res.status(404).json({ message: "Folder not found or cannot be deleted" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Email routes
+  app.get("/api/emails/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const folderId = req.query.folderId ? parseInt(req.query.folderId as string) : undefined;
+      const search = req.query.search as string;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
+      
+      const emails = await storage.getEmails(userId, folderId, search, limit, offset);
+      res.json(emails);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/emails/:userId/folder/:folderIdentifier", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const folderIdentifier = req.params.folderIdentifier;
+      const emails = await storage.getEmailsByFolder(userId, folderIdentifier);
+      res.json(emails);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Search emails route
+  app.get("/api/search/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const query = req.query.q as string;
+      
+      if (!query || query.trim() === '') {
+        return res.json([]);
+      }
+      
+      const emails = await storage.searchEmails(userId, query);
+      res.json(emails);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/email/:id", async (req, res) => {
+    try {
+      const emailId = parseInt(req.params.id);
+      const email = await storage.getEmail(emailId);
+      if (!email) {
+        return res.status(404).json({ message: "Email not found" });
+      }
+      res.json(email);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/emails", async (req, res) => {
+    try {
+      console.log("Creating email with data:", JSON.stringify(req.body, null, 2));
+      const emailData = insertEmailSchema.parse(req.body);
+      
+      // Check if user can receive/send emails (storage not full)
+      const canReceive = await storage.canUserReceiveEmails(emailData.userId);
+      if (!canReceive) {
+        return res.status(413).json({ 
+          message: "Armazenamento cheio. Exclua emails com anexos para liberar espaço.",
+          code: "STORAGE_FULL"
+        });
+      }
+      
+      // Get user signature and append to email body if it exists
+      //const user = await storage.getUser(emailData.userId);
+      //if (user?.signature && emailData.body) {
+        // Add signature with line breaks
+        //const signatureWithBreaks = `<br><br><br><br><br>${user.signature.replace(/\n/g, '<br>')}`;
+        //emailData.body = emailData.body + signatureWithBreaks;
+      //}
+      
+      const email = await storage.createEmail(emailData);
+      res.json(email);
+    } catch (error) {
+      console.error("Email creation error:", error);
+      res.status(400).json({ message: "Invalid request data", error: error instanceof Error ? error.message : "Unknown error" });
+    }
+  });
+
+  app.put("/api/email/:id", async (req, res) => {
+    try {
+      const emailId = parseInt(req.params.id);
+      const updateData = updateEmailSchema.parse(req.body);
+      const email = await storage.updateEmail(emailId, updateData);
+      if (!email) {
+        return res.status(404).json({ message: "Email not found" });
+      }
+      res.json(email);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid request data" });
+    }
+  });
+
+  app.delete("/api/emails/:id", async (req, res) => {
+    try {
+      const emailId = parseInt(req.params.id);
+      console.log(`DELETE request for email ID: ${emailId}`);
+      
+      // Get email data before deletion to check for attachments
+      const email = await storage.getEmail(emailId);
+      if (!email) {
+        return res.status(404).json({ message: "Email not found" });
+      }
+      
+      // Clean up attachments if email has them and is being permanently deleted
+      if (email.hasAttachments && email.attachments) {
+        try {
+          const attachmentPaths = JSON.parse(email.attachments);
+          if (Array.isArray(attachmentPaths) && attachmentPaths.length > 0) {
+            await storage.cleanupEmailAttachments(email.userId, attachmentPaths);
+            console.log(`Cleaned up ${attachmentPaths.length} attachments for email ${emailId}`);
+          }
+        } catch (attachmentError) {
+          console.warn(`Failed to cleanup attachments for email ${emailId}:`, attachmentError);
+        }
+      }
+      
+      const success = await storage.deleteEmail(emailId);
+      console.log(`Delete email ${emailId} result: ${success}`);
+      if (!success) {
+        return res.status(404).json({ message: "Email not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting email:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.put("/api/email/:id/move", async (req, res) => {
+    try {
+      const emailId = parseInt(req.params.id);
+      const { folderId } = req.body;
+      const email = await storage.moveEmail(emailId, folderId);
+      if (!email) {
+        return res.status(404).json({ message: "Email not found" });
+      }
+      res.json(email);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid request data" });
+    }
+  });
+
+  app.put("/api/email/:id/star", async (req, res) => {
+    try {
+      const emailId = parseInt(req.params.id);
+      const email = await storage.toggleEmailStar(emailId);
+      if (!email) {
+        return res.status(404).json({ message: "Email not found" });
+      }
+      res.json(email);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.put("/api/email/:id/read", async (req, res) => {
+    try {
+      const emailId = parseInt(req.params.id);
+      const { isRead } = req.body;
+      const email = await storage.markEmailAsRead(emailId, isRead);
+      if (!email) {
+        return res.status(404).json({ message: "Email not found" });
+      }
+      res.json(email);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid request data" });
+    }
+  });
+
+  app.get("/api/search/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const query = req.query.q as string;
+      if (!query) {
+        return res.status(400).json({ message: "Search query is required" });
+      }
+      const emails = await storage.searchEmails(userId, query);
+      res.json(emails);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/counts/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const counts = await storage.getEmailCounts(userId);
+      res.json(counts);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Storage management routes
+  app.get("/api/storage/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const storageInfo = await storage.getUserStorageInfo(userId);
+      res.json(storageInfo);
+    } catch (error) {
+      console.error("Storage info error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/storage/:userId/check", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const canReceive = await storage.canUserReceiveEmails(userId);
+      res.json({ canReceive });
+    } catch (error) {
+      console.error("Storage check error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Email tag routes
+  app.post("/api/emails/:emailId/tags/:tagId", async (req, res) => {
+    try {
+      const emailId = parseInt(req.params.emailId);
+      const tagId = parseInt(req.params.tagId);
+      const success = await storage.addEmailTag(emailId, tagId);
+      res.json({ success });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/emails/:emailId/tags/:tagId", async (req, res) => {
+    try {
+      const emailId = parseInt(req.params.emailId);
+      const tagId = parseInt(req.params.tagId);
+      const success = await storage.removeEmailTag(emailId, tagId);
+      res.json({ success });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/emails/:emailId/tags", async (req, res) => {
+    try {
+      const emailId = parseInt(req.params.emailId);
+      const tags = await storage.getEmailTags(emailId);
+      res.json(tags);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/tags/:tagId/emails/:userId", async (req, res) => {
+    try {
+      const tagId = parseInt(req.params.tagId);
+      const userId = parseInt(req.params.userId);
+      const emails = await storage.getEmailsByTag(userId, tagId);
+      res.json(emails);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Tag management routes
+  app.get("/api/tags/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const tags = await storage.getTags(userId);
+      res.json(tags);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/tags", async (req, res) => {
+    try {
+      const tagData = req.body;
+      
+      // Check if tag name already exists for this user
+      const existingTags = await storage.getTags(tagData.userId);
+      const tagExists = existingTags.some(tag => 
+        tag.name.toLowerCase() === tagData.name.toLowerCase()
+      );
+      
+      if (tagExists) {
+        return res.status(409).json({ message: "Uma tag com este nome já existe" });
+      }
+      
+      // Check if a folder with the same name exists for this user
+      const existingFolders = await storage.getFolders(tagData.userId);
+      const folderExists = existingFolders.some(folder => 
+        folder.name.toLowerCase() === tagData.name.toLowerCase()
+      );
+      
+      if (folderExists) {
+        return res.status(409).json({ message: "Já existe uma pasta com este nome" });
+      }
+      
+      const tag = await storage.createTag(tagData);
+      res.status(201).json(tag);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid tag data" });
+    }
+  });
+
+  app.put("/api/tags/:id", async (req, res) => {
+    try {
+      const tagId = parseInt(req.params.id);
+      const updateData = req.body;
+      
+      // If updating name, check for conflicts
+      if (updateData.name && typeof updateData.name === 'string') {
+        const currentTag = await storage.getTag(tagId);
+        if (!currentTag) {
+          return res.status(404).json({ message: "Tag not found" });
+        }
+        
+        const newName = updateData.name.toLowerCase();
+        
+        // Check if another tag with this name exists (excluding current tag)
+        const existingTags = await storage.getTags(currentTag.userId);
+        const tagExists = existingTags.some(tag => 
+          tag.id !== tagId && tag.name.toLowerCase() === newName
+        );
+        
+        if (tagExists) {
+          return res.status(409).json({ message: "Uma tag com este nome já existe" });
+        }
+        
+        // Check if a folder with the same name exists
+        const existingFolders = await storage.getFolders(currentTag.userId);
+        const folderExists = existingFolders.some(folder => 
+          folder.name.toLowerCase() === newName
+        );
+        
+        if (folderExists) {
+          return res.status(409).json({ message: "Já existe uma pasta com este nome" });
+        }
+      }
+      
+      const tag = await storage.updateTag(tagId, updateData);
+      if (!tag) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      res.json(tag);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid tag data" });
+    }
+  });
+
+  app.delete("/api/tags/:id", async (req, res) => {
+    try {
+      const tagId = parseInt(req.params.id);
+      const success = await storage.deleteTag(tagId);
+      if (!success) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Active draft management routes
+  app.post("/api/drafts/active/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const draft = await storage.createActiveDraft(userId);
+      res.json(draft);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create active draft" });
+    }
+  });
+
+  app.get("/api/drafts/active/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const draft = await storage.getActiveDraft(userId);
+      if (!draft) {
+        return res.status(404).json({ message: "No active draft found" });
+      }
+      res.json(draft);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/drafts/active/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      await storage.clearActiveDraft(userId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Alias routes
+  app.get("/api/aliases/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const aliases = await storage.getAliases(userId);
+      res.json(aliases);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/alias/:id", async (req, res) => {
+    try {
+      const aliasId = parseInt(req.params.id);
+      const alias = await storage.getAlias(aliasId);
+      if (!alias) {
+        return res.status(404).json({ message: "Alias not found" });
+      }
+      res.json(alias);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/aliases", async (req, res) => {
+    try {
+      const aliasData = insertAliasSchema.parse(req.body);
+      const alias = await storage.createAlias(aliasData);
+      res.status(201).json(alias);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.put("/api/alias/:id", async (req, res) => {
+    try {
+      const aliasId = parseInt(req.params.id);
+      const updateData = updateAliasSchema.parse(req.body);
+      const alias = await storage.updateAlias(aliasId, updateData);
+      if (!alias) {
+        return res.status(404).json({ message: "Alias not found" });
+      }
+      res.json(alias);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/alias/:id", async (req, res) => {
+    try {
+      const aliasId = parseInt(req.params.id);
+      const deleted = await storage.deleteAlias(aliasId);
+      if (!deleted) {
+        return res.status(404).json({ message: "Alias not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/alias/:id/toggle", async (req, res) => {
+    try {
+      const aliasId = parseInt(req.params.id);
+      const alias = await storage.toggleAliasStatus(aliasId);
+      if (!alias) {
+        return res.status(404).json({ message: "Alias not found" });
+      }
+      res.json(alias);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  const httpServer = createServer(app);
+  return httpServer;
+}

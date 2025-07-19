@@ -1,0 +1,38 @@
+1. Na pasta SENT (Enviados), ao abrir o e-mail, o HTML é renderizado! Boa! Mas na listagem de e-mail, ainda aparece <p>texto</p>. 
+
+2. Ao remover a foto de perfil, não fica aparecendo mais nada! E eu não quero isso: bote para aparecer o icone padrão de primeira + ultima letra do nome.
+
+3. Certifique que, tanto no momento de criar conta (Register), quanto em settings > account, que NAME e LASTNAME sejam só aceitos Letras (com ou sem acentos), espaços e ' (aspas simples), desde que aspas simples não seja a primeira letra. Espaço também não pode ser a primeira letra. Salve no botão de dados de forma que toda primeira letra fique maiuscula.
+
+4. O problema de abrir settings e carregar a foto 2x ainda persiste. Vejo no devtools que estas funções (obfuscadas por já estar em produção) que chamam:
+
+function D1(e, t) {
+    return e ? t ? (e.src !== t && (e.src = t),
+    e.complete && e.naturalWidth > 0 ? "loaded" : "loading") : "error" : "idle"
+}
+
+e
+
+function ig(e, t, r, n) {
+    var s = zt.hasOwnProperty(t) ? zt[t] : null;
+    (s !== null ? s.type !== 0 : n || !(2 < t.length) || t[0] !== "o" && t[0] !== "O" || t[1] !== "n" && t[1] !== "N") && (EO(t, r, s, n) && (r = null),
+    n || s === null ? SO(t) && (r === null ? e.removeAttribute(t) : e.setAttribute(t, "" + r)) : s.mustUseProperty ? e[s.propertyName] = r === null ? s.type === 3 ? !1 : "" : r : (t = s.attributeName,
+    n = s.attributeNamespace,
+    r === null ? e.removeAttribute(t) : (s = s.type,
+    r = s === 3 || s === 4 && r === !0 ? "" : "" + r,
+    n ? e.setAttributeNS(n, t, r) : e.setAttribute(t, r))))
+}
+
+Da pra otimizar ou não?
+
+5. O botão de "Permanecer conectado" não está aparecendo na tela de login. Você editou o arquivo de autenticação?
+
+6. Em settings, ao clicar em "Salvar", faça o dialog fechar.
+
+7. Em SENT (enviados), ao selecionar um e-mail, aparece o input (mover para pastas, gerenciar tags, excluir etc). Remova este input para e-mails em SENT e substitua com o botão Excluir. Este comportamento acontece de forma idêntica como quero na pasta DRAFTS. Ao selecionar um e-mail em DRAFTS, só aparece o botão de DELETAR.
+
+8. Em SETTINGS, o botão de "Sair" deve ser colocado abaixo de Assinatura. E ele deve ocupar toda a largura da pagina.
+
+9. Em SETTINGS, remova o campo TELEFONE.
+
+10. No ato de REGISTRAR, o formulario ta passando um pouco da pagina, como se a pagina n suportasse o tamanho. Faça para scrollar, sem mostrar o scrollbar.

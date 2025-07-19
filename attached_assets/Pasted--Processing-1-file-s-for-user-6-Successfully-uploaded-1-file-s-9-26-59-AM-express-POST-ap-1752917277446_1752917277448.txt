@@ -1,0 +1,59 @@
+📎 Processing 1 file(s) for user 6
+✅ Successfully uploaded 1 file(s)
+9:26:59 AM [express] POST /api/attachments/upload/6 200 in 742ms :: {"success":true,"attachments":[{…
+Creating active draft for user: 6 forceNew: false
+📝 Creating NEW active draft for user: 6 forceNew: false
+🧹 Cleaning up empty drafts for user 6
+🧹 Cleaned up [object Object], empty drafts
+📝 Created active draft with ID: 344
+Active draft created successfully: 344
+9:27:00 AM [express] POST /api/drafts/active/6 200 in 23ms :: {"id":344,"userId":6,"folderId":4,"mes…
+📧 Creating email with data: {
+  userId: 6,
+  folderId: 4,
+  messageId: 'draft-1752917221611',
+  subject: '',
+  body: '<p>QQ</p>',
+  fromAddress: 'aba@eliano.dev',
+  fromName: 'John Doe',
+  toAddress: '',
+  toName: null,
+  ccAddress: null,
+  bccAddress: null,
+  replyToAddress: null,
+  isRead: true,
+  isStarred: false,
+  isDraft: true,
+  hasAttachments: true,
+  attachments: '[{"filename":"Email Professora Cláudia.pdf","path":"1752917219477_Email Professora Cláudia.pdf","size":177346,"mimetype":"application/pdf"}]',
+  priority: 'normal',
+  tags: null
+}
+🔒 HTML content sanitized: {
+  originalLength: 9,
+  sanitizedLength: 9,
+  dangerousContentRemoved: false
+}
+🔒 Email data sanitized for security
+📧 Final sanitized email data before creation
+📧 createEmail called with isDraft: 1 messageId: draft-1752917221611
+📧 Updating existing active draft instead of creating new one
+📝 Updating email 344 - Original data: { subject: '...', body: '<p>QQ</p>...' }
+📎 ATTACHMENTS DEBUG - Update email input data: {
+  attachments: undefined,
+  hasAttachments: undefined,
+  attachmentsType: 'undefined'
+}
+📎 ATTACHMENTS DEBUG - Raw database email data: {
+  rawAttachments: null,
+  rawHasAttachments: undefined,
+  rawAttachmentsType: 'object'
+}
+📎 ATTACHMENTS DEBUG - Preserving hasAttachments flag: {
+  originalHasAttachments: undefined,
+  encryptedHasAttachments: undefined,
+  attachmentsLength: 0
+}
+🔐 Encrypted update data: { subject: '...', body: 'k9YjnDQnHOkMIPbnc2wErGLwIGTUUb...' }
+🔓 Decrypted response data: { subject: '...', body: '<p>QQ</p>...' }
+📧 Email created successfully: 344
