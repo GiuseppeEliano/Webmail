@@ -1,0 +1,135 @@
+mysql> DESCRIBE users;
++-----------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| Field           | Type         | Null | Key | Default           | Extra                                         |
++-----------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| id              | int          | NO   | PRI | NULL              | auto_increment                                |
+| username        | varchar(50)  | NO   | UNI | NULL              |                                               |
+| email           | varchar(255) | NO   | UNI | NULL              |                                               |
+| password        | varchar(255) | NO   |     | NULL              |                                               |
+| firstName       | varchar(100) | YES  |     | NULL              |                                               |
+| lastName        | varchar(100) | YES  |     | NULL              |                                               |
+| profileImageUrl | varchar(500) | YES  |     | NULL              |                                               |
+| signature       | text         | YES  |     | NULL              |                                               |
+| storageUsed     | bigint       | YES  |     | 0                 |                                               |
+| storageQuota    | bigint       | YES  |     | 104857600         |                                               |
+| language        | varchar(10)  | YES  |     | pt                |                                               |
+| theme           | varchar(20)  | YES  |     | dark              |                                               |
+| avatarShape     | varchar(20)  | YES  |     | rounded           |                                               |
+| sidebarView     | varchar(20)  | YES  |     | expanded          |                                               |
+| createdAt       | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| updatedAt       | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++-----------------+--------------+------+-----+-------------------+-----------------------------------------------+
+16 rows in set (0.00 sec)
+
+mysql> DESCRIBE aliases;
++-------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| Field       | Type         | Null | Key | Default           | Extra                                         |
++-------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| id          | int          | NO   | PRI | NULL              | auto_increment                                |
+| userId      | int          | NO   | MUL | NULL              |                                               |
+| aliasName   | varchar(100) | NO   | UNI | NULL              |                                               |
+| forwardTo   | varchar(255) | NO   |     | NULL              |                                               |
+| isActive    | tinyint(1)   | YES  | MUL | 1                 |                                               |
+| description | text         | YES  |     | NULL              |                                               |
+| createdAt   | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| updatedAt   | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++-------------+--------------+------+-----+-------------------+-----------------------------------------------+
+
+mysql> DESCRIBE emails;
++---------------+-----------------------------+------+-----+-------------------+-----------------------------------------------+
+| Field         | Type                        | Null | Key | Default           | Extra                                         |
++---------------+-----------------------------+------+-----+-------------------+-----------------------------------------------+
+| id            | int                         | NO   | PRI | NULL              | auto_increment                                |
+| userId        | int                         | NO   | MUL | NULL              |                                               |
+| folderId      | int                         | NO   | MUL | NULL              |                                               |
+| messageId     | varchar(255)                | YES  | UNI | NULL              |                                               |
+| threadId      | varchar(255)                | YES  | MUL | NULL              |                                               |
+| fromAddress   | varchar(255)                | NO   | MUL | NULL              |                                               |
+| fromName      | varchar(255)                | YES  |     | NULL              |                                               |
+| toAddress     | text                        | NO   |     | NULL              |                                               |
+| ccAddress     | text                        | YES  |     | NULL              |                                               |
+| bccAddress    | text                        | YES  |     | NULL              |                                               |
+| subject       | varchar(255)                | NO   |     | NULL              |                                               |
+| body          | longtext                    | NO   |     | NULL              |                                               |
+| attachments   | json                        | YES  |     | NULL              |                                               |
+| isRead        | tinyint(1)                  | YES  | MUL | 0                 |                                               |
+| isStarred     | tinyint(1)                  | YES  | MUL | 0                 |                                               |
+| isDraft       | tinyint(1)                  | YES  | MUL | 0                 |                                               |
+| isActiveDraft | tinyint(1)                  | YES  |     | 0                 |                                               |
+| priority      | enum('low','normal','high') | YES  |     | normal            |                                               |
+| sentAt        | timestamp                   | YES  |     | NULL              |                                               |
+| receivedAt    | timestamp                   | YES  | MUL | NULL              |                                               |
+| createdAt     | timestamp                   | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| updatedAt     | timestamp                   | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++---------------+-----------------------------+------+-----+-------------------+-----------------------------------------------+
+22 rows in set (0.01 sec)
+
+mysql> DESCRIBE email_tags;
++-----------+-----------+------+-----+-------------------+-------------------+
+| Field     | Type      | Null | Key | Default           | Extra             |
++-----------+-----------+------+-----+-------------------+-------------------+
+| id        | int       | NO   | PRI | NULL              | auto_increment    |
+| emailId   | int       | NO   | MUL | NULL              |                   |
+| tagId     | int       | NO   | MUL | NULL              |                   |
+| createdAt | timestamp | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
++-----------+-----------+------+-----+-------------------+-------------------+
+4 rows in set (0.01 sec)
+
+mysql> DESCRIBE folders;
++------------+-------------------------+------+-----+-------------------+-----------------------------------------------+
+| Field      | Type                    | Null | Key | Default           | Extra                                         |
++------------+-------------------------+------+-----+-------------------+-----------------------------------------------+
+| id         | int                     | NO   | PRI | NULL              | auto_increment                                |
+| userId     | int                     | NO   | MUL | NULL              |                                               |
+| name       | varchar(100)            | NO   |     | NULL              |                                               |
+| type       | enum('system','custom') | YES  | MUL | custom            |                                               |
+| systemType | varchar(50)             | YES  |     | NULL              |                                               |
+| icon       | varchar(50)             | YES  |     | NULL              |                                               |
+| color      | varchar(7)              | YES  |     | NULL              |                                               |
+| createdAt  | timestamp               | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| updatedAt  | timestamp               | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++------------+-------------------------+------+-----+-------------------+-----------------------------------------------+
+9 rows in set (0.00 sec)
+
+
+mysql> DESCRIBE sessions;
++--------+-------------+------+-----+---------+-------+
+| Field  | Type        | Null | Key | Default | Extra |
++--------+-------------+------+-----+---------+-------+
+| sid    | varchar(36) | NO   | PRI | NULL    |       |
+| sess   | json        | NO   |     | NULL    |       |
+| expire | timestamp   | NO   | MUL | NULL    |       |
++--------+-------------+------+-----+---------+-------+
+3 rows in set (0.01 sec)
+
+
+mysql> DESCRIBE tags;
++-----------+-------------+------+-----+-------------------+-----------------------------------------------+
+| Field     | Type        | Null | Key | Default           | Extra                                         |
++-----------+-------------+------+-----+-------------------+-----------------------------------------------+
+| id        | int         | NO   | PRI | NULL              | auto_increment                                |
+| userId    | int         | NO   | MUL | NULL              |                                               |
+| name      | varchar(50) | NO   |     | NULL              |                                               |
+| color     | varchar(7)  | YES  |     | #3b82f6           |                                               |
+| createdAt | timestamp   | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| updatedAt | timestamp   | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++-----------+-------------+------+-----+-------------------+-----------------------------------------------+
+6 rows in set (0.00 sec)
+
+
+
+Veja a estrutura da tabela.
+Vc tem que refazer schema.ts com base na estrutura que vc criou e me enviou! Esta estrutura vc fez como .SQL e eu importei. 
+
+Agora veja o schema:
+firstName: varchar("first_name", { length: 255 }).notNull(),
+...
+
+De onde vem first_name?
+
+avatarShape: varchar("avatar_shape", { length: 20 }).notNull().default("rounded"),
+De onde vem avatar_shape? 
+
+Fico recebendo erros na API por não encontrar esses campos. Refaça schema.ts de forma sincronizada com o banco que vc fez.
+
+

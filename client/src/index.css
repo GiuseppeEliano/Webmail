@@ -1,0 +1,1071 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Hide scrollbars globally */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
+:root {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(243, 75%, 59%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.75rem;
+
+  /* Custom Eliano colors */
+  --dark-50: hsl(215, 28%, 40%);
+  --dark-100: hsl(215, 20%, 35%);
+  --dark-200: hsl(215, 16%, 25%);
+  --dark-300: hsl(215, 19%, 15%);
+  --dark-400: hsl(215, 28%, 9%);
+  --dark-500: hsl(215, 39%, 4%);
+}
+
+@keyframes pulse-subtle {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.light {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(222.2, 84%, 4.9%);
+  --muted: hsl(210, 40%, 96%);
+  --muted-foreground: hsl(215.4, 16.3%, 46.9%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(222.2, 84%, 4.9%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(222.2, 84%, 4.9%);
+  --border: hsl(214.3, 31.8%, 91.4%);
+  --input: hsl(214.3, 31.8%, 91.4%);
+  --primary: hsl(217.2, 91.2%, 59.8%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(210, 40%, 96%);
+  --secondary-foreground: hsl(222.2, 84%, 4.9%);
+  --accent: hsl(210, 40%, 96%);
+  --accent-foreground: hsl(222.2, 84%, 4.9%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --ring: hsl(217.2, 91.2%, 59.8%);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(243, 75%, 59%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .gradient-bg {
+    @apply bg-background;
+    background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted)) 50%, hsl(var(--card)) 100%);
+  }
+
+  .dark .gradient-bg {
+    background: linear-gradient(135deg, hsl(215, 28%, 9%) 0%, hsl(215, 19%, 15%) 50%, hsl(215, 16%, 25%) 100%);
+  }
+
+  /* Remove number input spinners */
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+
+  .light .gradient-bg {
+    background: linear-gradient(135deg, hsl(0, 0%, 100%) 0%, hsl(210, 40%, 98%) 50%, hsl(210, 40%, 96%) 100%);
+  }
+
+  .scroll-custom::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scroll-custom::-webkit-scrollbar-track {
+    background: #1f2937;
+    border-radius: 10px;
+  }
+
+  .scroll-custom::-webkit-scrollbar-thumb {
+    background: #6366f1;
+    border-radius: 10px;
+  }
+
+  .scroll-custom::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+
+  .dark .scroll-custom::-webkit-scrollbar-track {
+    background: #1f2937;
+  }
+
+  .dark .scroll-custom::-webkit-scrollbar-thumb {
+    background: #6366f1;
+  }
+
+  .dark .scroll-custom::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+
+  .light .scroll-custom::-webkit-scrollbar-track {
+    background: #f3f4f6;
+  }
+
+  .light .scroll-custom::-webkit-scrollbar-thumb {
+    background: #6366f1;
+  }
+
+  .light .scroll-custom::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+
+  /* Scrollbar fino para sidebar collapsed */
+  .scroll-thin::-webkit-scrollbar {
+    width: 1px;
+  }
+
+  .scroll-thin::-webkit-scrollbar-track {
+    background: #1f2937;
+    border-radius: 1px;
+  }
+
+  .scroll-thin::-webkit-scrollbar-thumb {
+    background: #6366f1;
+    border-radius: 1px;
+  }
+
+  .scroll-thin::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+
+  .dark .scroll-thin::-webkit-scrollbar-track {
+    background: #1f2937;
+  }
+
+  .dark .scroll-thin::-webkit-scrollbar-thumb {
+    background: #6366f1;
+  }
+
+  .dark .scroll-thin::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+
+  .light .scroll-thin::-webkit-scrollbar-track {
+    background: #f3f4f6;
+  }
+
+  .light .scroll-thin::-webkit-scrollbar-thumb {
+    background: #6366f1;
+  }
+
+  .light .scroll-thin::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+
+  /* Scrollbar invisível para sidebar collapsed */
+  .scroll-invisible {
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+  }
+
+  .scroll-invisible::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari e Opera */
+  }
+
+  /* Scroll com hover dinâmico para sidebar collapsed */
+  .scroll-hover-only {
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+  }
+
+  .scroll-hover-only::-webkit-scrollbar {
+    width: 0px;
+  }
+
+  .scroll-hover-only.show-scrollbar {
+    scrollbar-width: auto;
+    /* Firefox */
+    -ms-overflow-style: auto;
+    /* IE and Edge */
+    scrollbar-color: #6366f1 #1f2937;
+    /* Firefox - thumb track */
+  }
+
+  .scroll-hover-only.show-scrollbar::-webkit-scrollbar {
+    width: 2px !important;
+  }
+
+  .scroll-hover-only.show-scrollbar::-webkit-scrollbar-track {
+    background: #1f2937 !important;
+    border-radius: 1px;
+  }
+
+  .scroll-hover-only.show-scrollbar::-webkit-scrollbar-thumb {
+    background: #6366f1 !important;
+    border-radius: 1px;
+  }
+
+  .scroll-hover-only.show-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+
+  .dark .scroll-hover-only.show-scrollbar {
+    scrollbar-color: #6366f1 #1f2937;
+    /* Firefox - thumb track */
+  }
+
+  .dark .scroll-hover-only.show-scrollbar::-webkit-scrollbar-track {
+    background: #1f2937;
+  }
+
+  .dark .scroll-hover-only.show-scrollbar::-webkit-scrollbar-thumb {
+    background: #6366f1;
+  }
+
+  .dark .scroll-hover-only.show-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+
+  /* High z-index for deletion confirmation dialogs */
+  [data-radix-popper-content-wrapper] {
+    z-index: 200 !important;
+  }
+  
+  /* Ensure dialog content has highest priority */
+  [data-radix-dialog-content] {
+    z-index: 300 !important;
+  }
+  
+  /* Ensure dialog overlay is above compose modal */
+  [data-radix-dialog-overlay] {
+    z-index: 250 !important;
+  }
+  
+  /* Force attachment modal to be on top */
+  .attachment-modal-content {
+    z-index: 9999 !important;
+    position: fixed !important;
+  }
+  
+  /* Specific targeting for attachment modal */
+  [data-radix-dialog-content].attachment-modal-content {
+    z-index: 9999 !important;
+    position: fixed !important;
+  }
+  
+  /* Force overlay for attachment modal */
+  [data-radix-dialog-overlay] + [data-radix-dialog-content].attachment-modal-content {
+    z-index: 10000 !important;
+  }
+
+  /* Ensure AlertDialog overlay and content are above regular dialogs */
+  .z-\[200\] {
+    z-index: 200 !important;
+  }
+
+  /* AlertDialog overlay needs higher z-index too */
+  [data-overlay] {
+    z-index: 199 !important;
+  }
+
+  /* Specific styling for AlertDialog components */
+  [role="alertdialog"] {
+    z-index: 200 !important;
+  }
+
+  .light .scroll-hover-only.show-scrollbar {
+    scrollbar-color: #6366f1 #f3f4f6;
+    /* Firefox - thumb track */
+  }
+
+  .light .scroll-hover-only.show-scrollbar::-webkit-scrollbar-track {
+    background: #f3f4f6;
+  }
+
+  .light .scroll-hover-only.show-scrollbar::-webkit-scrollbar-thumb {
+    background: #6366f1;
+  }
+
+  .light .scroll-hover-only.show-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+
+  /* Rich text editor styles */
+  .editor-content {
+    min-height: 150px;
+  }
+
+  .editor-content:empty:before {
+    content: attr(data-placeholder);
+    color: hsl(var(--muted-foreground));
+    pointer-events: none;
+  }
+
+  .editor-content:focus:before {
+    display: none;
+  }
+
+  /* Quill Editor Styles for Light Theme */
+  .light .ql-toolbar {
+    border: 1px solid hsl(var(--border)) !important;
+    border-bottom: none !important;
+    background: hsl(var(--background)) !important;
+  }
+
+  .light .ql-container {
+    border: 1px solid hsl(var(--border)) !important;
+    border-top: none !important;
+  }
+
+  .light .ql-toolbar .ql-stroke {
+    stroke: #000000 !important;
+  }
+
+  .light .ql-toolbar .ql-fill {
+    fill: #000000 !important;
+  }
+
+  .light .ql-toolbar .ql-picker-label {
+    color: #000000 !important;
+  }
+
+  .light .ql-toolbar button {
+    color: #000000 !important;
+  }
+
+  .light .ql-toolbar button:hover {
+    background: hsl(var(--muted)) !important;
+  }
+
+  .light .ql-toolbar button.ql-active {
+    background: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+  }
+
+  .light .ql-toolbar button.ql-active .ql-stroke {
+    stroke: hsl(var(--primary-foreground)) !important;
+  }
+
+  .light .ql-toolbar button.ql-active .ql-fill {
+    fill: hsl(var(--primary-foreground)) !important;
+  }
+
+  /* Specific fixes for Quill icons in light theme */
+  .light .ql-toolbar svg {
+    color: #000000 !important;
+  }
+
+  .light .ql-toolbar svg .ql-stroke {
+    stroke: #000000 !important;
+  }
+
+  .light .ql-toolbar svg .ql-fill {
+    fill: #000000 !important;
+  }
+
+  /* Simple Quill styling with rounded borders */
+  .ql-toolbar {
+    border-radius: 8px 8px 0 0 !important;
+    background: hsl(var(--background)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    border-bottom: none !important;
+  }
+
+  .ql-container {
+    border-radius: 0 0 8px 8px !important;
+    background: hsl(var(--background)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    border-top: none !important;
+  }
+
+  .ql-editor {
+    border: none !important;
+    outline: none !important;
+  }
+
+  /* Settings modal z-index fix */
+  [data-radix-popper-content-wrapper] {
+    z-index: 100 !important;
+  }
+
+  [role="dialog"] {
+    z-index: 100 !important;
+  }
+
+  .fixed.inset-0.z-50 {
+    z-index: 100 !important;
+  }
+
+  /* Dark theme styles for Quill (existing) */
+  .dark .ql-toolbar {
+    border: 1px solid hsl(var(--border)) !important;
+    border-bottom: none !important;
+    background: hsl(var(--background)) !important;
+  }
+
+  .dark .ql-container {
+    border: 1px solid hsl(var(--border)) !important;
+    border-top: none !important;
+  }
+
+  .dark .ql-toolbar .ql-stroke {
+    stroke: hsl(var(--foreground)) !important;
+  }
+
+  .dark .ql-toolbar .ql-fill {
+    fill: hsl(var(--foreground)) !important;
+  }
+
+  .dark .ql-toolbar .ql-picker-label {
+    color: hsl(var(--foreground)) !important;
+  }
+
+  .dark .ql-toolbar button {
+    color: hsl(var(--foreground)) !important;
+  }
+
+  /* React Quill Theme Integration */
+  .ql-container {
+    border: 1px solid hsl(var(--border)) !important;
+    border-top: none !important;
+    background: transparent !important;
+    color: hsl(var(--foreground)) !important;
+    font-family: inherit !important;
+    font-size: 14px !important;
+    border-radius: 0 0 8px 8px !important;
+  }
+
+  .ql-editor {
+    background: transparent !important;
+    color: hsl(var(--foreground)) !important;
+    border: none !important;
+    outline: none !important;
+    padding: 16px !important;
+    margin: 0 !important;
+    line-height: 1.6 !important;
+    font-family: inherit !important;
+    min-height: 100% !important;
+    max-height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+
+  .ql-toolbar {
+    border: 1px solid hsl(var(--border)) !important;
+    border-bottom: 1px solid hsl(var(--border)) !important;
+    background: hsl(var(--muted) / 0.3) !important;
+    padding: 8px 16px !important;
+    margin: 0 !important;
+    border-radius: 8px 8px 0 0 !important;
+  }
+
+  /* Dark theme specific styles */
+  .dark .ql-container {
+    background: transparent !important;
+    border-color: hsl(220 13% 25%) !important;
+  }
+
+  .dark .ql-editor {
+    background: transparent !important;
+    color: hsl(220 13% 91%) !important;
+  }
+
+  .dark .ql-toolbar {
+    background: hsl(220 13% 15%) !important;
+    border-color: hsl(220 13% 25%) !important;
+  }
+
+  .ql-toolbar .ql-stroke {
+    stroke: hsl(var(--foreground)) !important;
+    stroke-width: 2px !important;
+    opacity: 0.85 !important;
+  }
+
+  .ql-toolbar .ql-fill {
+    fill: hsl(var(--foreground)) !important;
+    opacity: 0.85 !important;
+  }
+
+  .ql-toolbar .ql-picker {
+    color: hsl(var(--foreground)) !important;
+    font-weight: 500 !important;
+  }
+
+  .ql-toolbar .ql-picker-label {
+    color: hsl(var(--foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+    font-weight: 500 !important;
+  }
+
+  .ql-toolbar .ql-picker-item {
+    color: hsl(var(--foreground)) !important;
+  }
+
+  .ql-toolbar button {
+    color: hsl(var(--foreground)) !important;
+    border: none !important;
+    padding: 6px !important;
+    margin: 1px !important;
+    border-radius: 4px !important;
+    font-weight: 600 !important;
+  }
+
+  .ql-toolbar button:hover {
+    background: hsl(var(--accent)) !important;
+    color: hsl(var(--accent-foreground)) !important;
+  }
+
+  .ql-toolbar button:hover .ql-stroke {
+    stroke: hsl(var(--accent-foreground)) !important;
+    opacity: 1 !important;
+  }
+
+  .ql-toolbar button:hover .ql-fill {
+    fill: hsl(var(--accent-foreground)) !important;
+    opacity: 1 !important;
+  }
+
+  .ql-toolbar button.ql-active {
+    background: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+  }
+
+  .ql-toolbar button.ql-active .ql-stroke {
+    stroke: hsl(var(--primary-foreground)) !important;
+    opacity: 1 !important;
+  }
+
+  .ql-toolbar button.ql-active .ql-fill {
+    fill: hsl(var(--primary-foreground)) !important;
+    opacity: 1 !important;
+  }
+
+  .ql-toolbar button svg {
+    opacity: 1 !important;
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  /* Dark theme specific icon colors */
+  .dark .ql-toolbar .ql-stroke {
+    stroke: hsl(220 13% 91%) !important;
+    opacity: 1 !important;
+  }
+
+  .dark .ql-toolbar .ql-fill {
+    fill: hsl(220 13% 91%) !important;
+    opacity: 1 !important;
+  }
+
+  .dark .ql-toolbar .ql-picker {
+    color: hsl(220 13% 91%) !important;
+  }
+
+  .dark .ql-toolbar .ql-picker-label {
+    color: hsl(220 13% 91%) !important;
+    border-color: hsl(220 13% 25%) !important;
+  }
+
+  .dark .ql-toolbar button {
+    color: hsl(220 13% 91%) !important;
+  }
+
+  .dark .ql-toolbar button:hover {
+    background: hsl(220 13% 25%) !important;
+    color: hsl(220 13% 91%) !important;
+  }
+
+  .dark .ql-toolbar button:hover .ql-stroke {
+    stroke: hsl(220 13% 91%) !important;
+  }
+
+  .dark .ql-toolbar button:hover .ql-fill {
+    fill: hsl(220 13% 91%) !important;
+  }
+
+  .ql-editor::before {
+    color: hsl(var(--muted-foreground)) !important;
+    font-style: normal !important;
+  }
+
+  .ql-editor p {
+    margin: 0 0 8px 0 !important;
+    padding: 0 !important;
+  }
+
+  .ql-editor strong {
+    font-weight: bold !important;
+  }
+
+  .ql-editor em {
+    font-style: italic !important;
+  }
+
+  .ql-editor u {
+    text-decoration: underline !important;
+  }
+
+  .ql-editor s {
+    text-decoration: line-through !important;
+  }
+
+  .ql-editor.ql-blank::before {
+    color: hsl(var(--muted-foreground)) !important;
+    font-style: normal !important;
+    left: 16px !important;
+    right: 16px !important;
+  }
+
+  /* Remove all borders and fix container */
+  .ql-container,
+  .ql-toolbar {
+    border: none !important;
+  }
+
+  .ql-snow .ql-toolbar {
+    border-bottom: 1px solid hsl(var(--border)) !important;
+  }
+
+  /* Fix React Quill height and overflow issues */
+  .quill {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+  }
+
+  .quill .ql-container {
+    flex: 1 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .quill .ql-editor {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Compose Modal Positioning - Simple and stable */
+  .compose-modal-normal {
+    position: fixed !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    width: 729px !important;
+    height: 687px !important;
+    z-index: 9999 !important;
+    transform: none !important;
+    margin: 0 !important;
+  }
+
+  /* Only scale down when screen is too small */
+  @media (max-width: 729px) {
+    .compose-modal-normal {
+      width: 100vw !important;
+    }
+  }
+
+  @media (max-height: 687px) {
+    .compose-modal-normal {
+      height: 100vh !important;
+    }
+  }
+
+  .compose-modal-expanded {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+
+  /* Only adjust size, never position */
+  @media (max-width: 729px) {
+    .compose-modal-normal {
+      width: 100vw;
+    }
+  }
+
+  @media (max-height: 687px) {
+    .compose-modal-normal {
+      height: 100vh;
+    }
+  }
+
+
+
+
+
+  .ql-toolbar .ql-picker-options {
+    background: hsl(var(--background)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+  }
+
+  .ql-tooltip {
+    background: hsl(var(--background)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    color: hsl(var(--foreground)) !important;
+  }
+
+  .ql-tooltip input {
+    background: hsl(var(--input)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    color: hsl(var(--foreground)) !important;
+  }
+
+  /* Active toolbar buttons */
+  .ql-toolbar button:hover,
+  .ql-toolbar .ql-picker-label:hover {
+    background: var(--muted) !important;
+  }
+
+  .ql-toolbar button.ql-active,
+  .ql-toolbar .ql-picker-label.ql-active {
+    background: var(--primary) !important;
+  }
+
+  .ql-toolbar button.ql-active .ql-stroke,
+  .ql-toolbar .ql-picker-label.ql-active .ql-stroke {
+    stroke: var(--primary-foreground) !important;
+  }
+
+  .ql-toolbar button.ql-active .ql-fill,
+  .ql-toolbar .ql-picker-label.ql-active .ql-fill {
+    fill: var(--primary-foreground) !important;
+  }
+
+  .editor-content h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  .editor-content h2 {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  .editor-content h3 {
+    font-size: 1.125rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  .editor-content blockquote {
+    border-left: 4px solid hsl(var(--border));
+    padding-left: 1rem;
+    margin: 1rem 0;
+    font-style: italic;
+    background: hsl(var(--muted) / 0.3);
+    padding: 0.5rem 1rem;
+  }
+
+  .editor-content code {
+    background: hsl(var(--muted));
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-family: monospace;
+    font-size: 0.875em;
+  }
+
+  .editor-content ul,
+  .editor-content ol {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+  }
+
+  /* Fix email list scrolling at 100% resolution */
+  html,
+  body,
+  #root {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .email-interface {
+    min-height: 0;
+    flex: 1;
+  }
+
+  .email-list-container {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .editor-content li {
+    margin: 0.25rem 0;
+  }
+
+  .editor-content a {
+    color: hsl(var(--primary));
+    text-decoration: underline;
+  }
+
+  .editor-content a:hover {
+    opacity: 0.8;
+  }
+}
+
+@layer components {
+  .email-item {
+    @apply transition-all duration-200 cursor-pointer;
+  }
+
+  .email-item:hover {
+    background: linear-gradient(135deg, hsl(243, 75%, 59%, 0.1) 0%, hsl(217, 91%, 60%, 0.1) 100%);
+  }
+
+  .email-item.selected {
+    background: linear-gradient(135deg, hsl(243, 75%, 59%, 0.2) 0%, hsl(217, 91%, 60%, 0.2) 100%);
+    border-color: hsl(243, 75%, 59%, 0.3);
+  }
+
+  .nav-item {
+    @apply transition-all duration-200;
+  }
+
+  .nav-item.active {
+    background: linear-gradient(135deg, hsl(243, 75%, 59%, 0.2) 0%, hsl(217, 91%, 60%, 0.2) 100%);
+    color: hsl(243, 75%, 70%);
+    border: 1px solid hsl(243, 75%, 59%, 0.3);
+  }
+
+  .compose-editor {
+    @apply bg-card border border-border rounded-lg overflow-hidden;
+  }
+
+  .compose-editor .editor-toolbar {
+    @apply bg-muted border-b border-border p-3 flex items-center space-x-2;
+  }
+
+  .compose-editor .editor-content {
+    @apply bg-card text-foreground p-4 min-h-80 resize-none focus:outline-none;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  /* Prevent horizontal scroll during resize operations */
+  .overflow-x-hidden {
+    overflow-x: hidden !important;
+  }
+}
+
+/* Global styles to prevent horizontal scroll */
+body {
+  overflow-x: hidden;
+}
+
+#root {
+  overflow-x: hidden;
+}
+
+/* Drag and drop styles for compose box */
+.quill-drag-over .ql-editor {
+  border: 2px dashed hsl(var(--primary)) !important;
+  background: hsl(var(--primary) / 0.05) !important;
+  position: relative;
+}
+
+/* Comportamento responsivo para telas menores */
+@media (max-width: 960px) {
+
+  /* Forçar fullscreen em telas menores que 960px */
+  .email-interface .email-list-container:not(.always-visible) {
+    display: none;
+  }
+
+  .email-interface .email-content-container {
+    width: 100% !important;
+    flex: 1 !important;
+  }
+
+  /* Lista visível quando nenhum email selecionado */
+  .email-interface.no-email-selected .email-list-container {
+    display: flex !important;
+    width: 100% !important;
+    flex: 1 !important;
+  }
+
+  .email-interface.no-email-selected .email-content-container {
+    display: none !important;
+  }
+}
+
+/* Avatar container fixed sizing to prevent layout shifts */
+.avatar-container {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+  margin-left: 2px;
+  margin-top: 2px;
+}
+
+/* Email item consistent sizing */
+.email-item {
+  min-height: 96px !important;
+  max-height: 96px !important;
+  height: 96px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+/* Mobile email item adjustments */
+@media (max-width: 768px) {
+  .email-item {
+    min-height: 100px !important;
+    max-height: 100px !important;
+    height: 100px !important;
+    padding: 12px !important;
+  }
+
+  .email-item .flex {
+    overflow: hidden;
+  }
+
+  .email-item p {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .email-item .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+    max-height: 2.6em;
+    word-break: break-word;
+    hyphens: auto;
+  }
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted) / 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 4px;
+  border: 1px solid hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+::-webkit-scrollbar-corner {
+  background: hsl(var(--background));
+}
+
+/* Placeholder for contentEditable */
+[contenteditable][data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+}

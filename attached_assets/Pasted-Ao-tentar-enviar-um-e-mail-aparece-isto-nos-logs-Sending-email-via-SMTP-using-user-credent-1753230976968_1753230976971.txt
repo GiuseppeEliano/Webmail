@@ -1,0 +1,142 @@
+Ao tentar enviar um e-mail, aparece isto nos logs:
+
+
+📧 Sending email via SMTP using user credentials: {
+  smtpAuthUser: 'aba@eliano.dev',
+  realSender: 'aba@eliano.dev',
+  recipient: 'sheelwcs@hotmail.com',
+  subject: 'teste'
+}
+🔧 Creating SMTP transporter (swaks-compatible): {
+  host: '15.204.204.153',
+  port: 587,
+  secure: false,
+  requireTLS: true,
+  user: 'aba@eliano.dev',
+  authMethod: undefined
+}
+{ component: 'mail', tnx: 'create' } Creating transport: %s nodemailer (7.0.5; +https://nodemailer.com/; SMTP/7.0.5[client:7.0.5])
+📧 Preparing to send email: {
+  from: 'aba@eliano.dev',
+  to: 'sheelwcs@hotmail.com',
+  subject: 'teste',
+  hasAttachments: false
+}
+📧 Sending email with user credentials: {
+  smtpUser: 'aba@eliano.dev',
+  from: 'aba@eliano.dev',
+  to: 'sheelwcs@hotmail.com',
+  subject: 'teste',
+  attachments: []
+}
+{
+  component: 'mail',
+  tnx: 'transport',
+  name: 'SMTP',
+  version: '7.0.5[client:7.0.5]',
+  action: 'send'
+} Sending mail using %s/%s SMTP 7.0.5[client:7.0.5]
+{
+  component: 'smtp-connection',
+  sid: 'Lc5XwxiT1UQ',
+  tnx: 'dns',
+  source: '15.204.204.153',
+  resolved: '15.204.204.153',
+  cached: false
+} Resolved %s as %s [cache %s] 15.204.204.153 15.204.204.153 miss
+{
+  component: 'smtp-connection',
+  sid: 'Lc5XwxiT1UQ',
+  tnx: 'network',
+  localAddress: '15.204.204.153',
+  localPort: 60788,
+  remoteAddress: '15.204.204.153',
+  remotePort: 587
+} %s established to %s:%s Connection 15.204.204.153 587
+{ component: 'smtp-connection', sid: 'Lc5XwxiT1UQ', tnx: 'server' } 220 secmail.eliano.dev ESMTP Postfix (Eliano)
+{ component: 'smtp-connection', sid: 'Lc5XwxiT1UQ', tnx: 'client' } EHLO secmail.eliano.dev
+{ component: 'smtp-connection', sid: 'Lc5XwxiT1UQ', tnx: 'server' } 250-secmail.eliano.dev
+250-PIPELINING
+250-SIZE 52428800
+250-VRFY
+250-ETRN
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-8BITMIME
+250-DSN
+250 CHUNKING
+{ component: 'smtp-connection', sid: 'Lc5XwxiT1UQ', tnx: 'client' } STARTTLS
+{ component: 'smtp-connection', sid: 'Lc5XwxiT1UQ', tnx: 'server' } 220 2.0.0 Ready to start TLS
+(node:598891) [DEP0123] DeprecationWarning: Setting the TLS ServerName to an IP address is not permitted by RFC 6066. This will be ignored in a future version.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+{ component: 'smtp-connection', sid: 'Lc5XwxiT1UQ', tnx: 'smtp' } Connection upgraded with STARTTLS
+{ component: 'smtp-connection', sid: 'Lc5XwxiT1UQ', tnx: 'client' } EHLO secmail.eliano.dev
+{ component: 'smtp-connection', sid: 'Lc5XwxiT1UQ', tnx: 'server' } 250-secmail.eliano.dev
+250-PIPELINING
+250-SIZE 52428800
+250-VRFY
+250-ETRN
+250-AUTH PLAIN LOGIN
+250-ENHANCEDSTATUSCODES
+250-8BITMIME
+250-DSN
+250 CHUNKING
+{ component: 'smtp-connection', sid: 'Lc5XwxiT1UQ', tnx: 'smtp' } SMTP handshake finished
+{ component: 'smtp-connection', sid: 'Lc5XwxiT1UQ', tnx: 'client' } AUTH PLAIN AGFiYUBlbGlhbm8uZGV2AC8qIHNlY3JldCAqLw==
+{ component: 'smtp-connection', sid: 'Lc5XwxiT1UQ', tnx: 'server' } 535 5.7.8 Error: authentication failed:
+{
+  component: 'smtp-connection',
+  sid: 'Lc5XwxiT1UQ',
+  tnx: 'smtp',
+  username: 'aba@eliano.dev',
+  action: 'authfail',
+  method: 'PLAIN'
+} User %s failed to authenticate "aba@eliano.dev"
+{ component: 'smtp-connection', sid: 'Lc5XwxiT1UQ', tnx: 'smtp' } Closing connection to the server using "%s" end
+{
+  component: 'mail',
+  err: Error: Invalid login: 535 5.7.8 Error: authentication failed:
+      at SMTPConnection._formatError (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:809:19)
+      at SMTPConnection._actionAUTHComplete (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:1588:34)
+      at SMTPConnection.<anonymous> (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:556:26)
+      at SMTPConnection._processResponse (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:993:20)
+      at SMTPConnection._onData (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:774:14)
+      at SMTPConnection._onSocketData (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:195:44)
+      at TLSSocket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5) {
+    code: 'EAUTH',
+    response: '535 5.7.8 Error: authentication failed: ',
+    responseCode: 535,
+    command: 'AUTH PLAIN'
+  },
+  tnx: 'transport',
+  action: 'send'
+} Send Error: %s Invalid login: 535 5.7.8 Error: authentication failed:
+❌ Error sending email: Error: Invalid login: 535 5.7.8 Error: authentication failed:
+    at SMTPConnection._formatError (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:809:19)
+    at SMTPConnection._actionAUTHComplete (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:1588:34)
+    at SMTPConnection.<anonymous> (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:556:26)
+    at SMTPConnection._processResponse (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:993:20)
+    at SMTPConnection._onData (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:774:14)
+    at SMTPConnection._onSocketData (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:195:44)
+    at TLSSocket.emit (node:events:519:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5) {
+  code: 'EAUTH',
+  response: '535 5.7.8 Error: authentication failed: ',
+  responseCode: 535,
+  command: 'AUTH PLAIN'
+}
+❌ SMTP sending failed: Invalid login: 535 5.7.8 Error: authentication failed:
+{ component: 'smtp-connection', sid: 'Lc5XwxiT1UQ', tnx: 'network' } Connection closed
+
+
+
+Acho que o problema é em "userCredentials.password". Atualmente, a senha é registrada com hash. Teria como você alterar a senha (login/criar conta/atualizar senha no perfil) com encrypt? (/server/crypto.ts) em vez de hash? Assim, vai ser possivel dar decrypt para envio do email. O ENCRYPTION_KEY está em .env. Meu Com swaks, consigo enviar normalmente! Veja o comando que rodo:
+
+swaks --to sheelwcs@hotmail.com      --from aba@eliano.dev       --server 127.0.0.1:587       --auth LOGIN       --auth-user aba@eliano.dev       --auth-password teste12345       --tls --header "Subject: Título do Email" --body "Corpo do email"
+
+

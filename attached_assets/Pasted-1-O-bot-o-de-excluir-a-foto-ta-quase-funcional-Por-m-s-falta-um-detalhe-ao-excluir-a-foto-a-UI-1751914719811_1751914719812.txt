@@ -1,0 +1,42 @@
+1. O botão de excluir a foto ta quase funcional. Porém, só falta um detalhe: ao excluir a foto, a UI n atualiza para o icone de primeira letra do nome + sobrenome, só fica sem mostrar nada. Só volta a mostrar se recarregar a pagina (F5), mas eu n quero isso.
+
+2. No banco de dados, está sendo salvo pastas como "Inbox", "Spam" etc, para cada usuário criado é definido isso. Mas eu nao quero isso. Desejo que todo usuario, seja conta criada ou antiga, tenha as pastas (nesta ordem):
+Caixa de Entrada/Inbox
+Arquivo/Archive
+Rascunho/Drafts
+Enviados/Sent
+Spam
+Lixeira/Trash
+
+E cada pasta com um ícone personalizado:
+Inbox com ícone roxo de email
+Arquivo com ícone de estrela amarela
+Sent com ícone verde de enviado
+Drafts com ícone roxo de rascunho
+Junk com ícone laranja de alerta
+Trash com ícone vermelho de lixeira.
+
+Pedi pra vc ajustar mas n foi ajustado. A tabela folders deve só existir pastas criadas pelo usuários. Pastas type "system" nem deve entrar nesta tabela, pois devem ser renderizadas aos usuários de forma nativa no código.
+
+3. Ao carregar a página, dando F5, ou clicar no ícone de configurações (settings), percebo no console que a imagem de perfil (profile image) é carregada duas vezes:
+
+As funções que são chamadas são:
+
+function O1(e, t) {
+    return e ? t ? (e.src !== t && (e.src = t),
+    e.complete && e.naturalWidth > 0 ? "loaded" : "loading") : "error" : "idle"
+}
+
+e
+
+function tg(e, t, r, n) {
+    var i = Lt.hasOwnProperty(t) ? Lt[t] : null;
+    (i !== null ? i.type !== 0 : n || !(2 < t.length) || t[0] !== "o" && t[0] !== "O" || t[1] !== "n" && t[1] !== "N") && (NO(t, r, i, n) && (r = null),
+    n || i === null ? _O(t) && (r === null ? e.removeAttribute(t) : e.setAttribute(t, "" + r)) : i.mustUseProperty ? e[i.propertyName] = r === null ? i.type === 3 ? !1 : "" : r : (t = i.attributeName,
+    n = i.attributeNamespace,
+    r === null ? e.removeAttribute(t) : (i = i.type,
+    r = i === 3 || i === 4 && r === !0 ? "" : "" + r,
+    n ? e.setAttributeNS(n, t, r) : e.setAttribute(t, r))))
+}
+
+Só tenho isso de informação pq ta no modo produção e o código ta obfuscado. A imagem só deve ser carregada uma vez só, não tem necessidade de carregar a imagem duas vezes.

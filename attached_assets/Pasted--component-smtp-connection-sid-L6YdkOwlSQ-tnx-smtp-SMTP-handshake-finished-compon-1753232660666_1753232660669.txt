@@ -1,0 +1,52 @@
+
+{ component: 'smtp-connection', sid: 'L6YdkOwlSQ', tnx: 'smtp' } SMTP handshake finished
+{ component: 'smtp-connection', sid: 'L6YdkOwlSQ', tnx: 'client' } AUTH PLAIN AGFiYUBlbGlhbm8uZGV2AC8qIHNlY3JldCAqLw==
+{ component: 'smtp-connection', sid: 'L6YdkOwlSQ', tnx: 'server' } 535 5.7.8 Error: authentication failed:
+{
+  component: 'smtp-connection',
+  sid: 'L6YdkOwlSQ',
+  tnx: 'smtp',
+  username: 'aba@eliano.dev',
+  action: 'authfail',
+  method: 'PLAIN'
+} User %s failed to authenticate "aba@eliano.dev"
+{ component: 'smtp-connection', sid: 'L6YdkOwlSQ', tnx: 'smtp' } Closing connection to the server using "%s" end
+{
+  component: 'mail',
+  err: Error: Invalid login: 535 5.7.8 Error: authentication failed:
+      at SMTPConnection._formatError (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:809:19)
+      at SMTPConnection._actionAUTHComplete (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:1588:34)
+      at SMTPConnection.<anonymous> (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:556:26)
+      at SMTPConnection._processResponse (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:993:20)
+      at SMTPConnection._onData (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:774:14)
+      at SMTPConnection._onSocketData (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:195:44)
+      at TLSSocket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5) {
+    code: 'EAUTH',
+    response: '535 5.7.8 Error: authentication failed: ',
+    responseCode: 535,
+    command: 'AUTH PLAIN'
+  },
+  tnx: 'transport',
+  action: 'send'
+} Send Error: %s Invalid login: 535 5.7.8 Error: authentication failed:
+❌ Error sending email: Error: Invalid login: 535 5.7.8 Error: authentication failed:
+    at SMTPConnection._formatError (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:809:19)
+    at SMTPConnection._actionAUTHComplete (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:1588:34)
+    at SMTPConnection.<anonymous> (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:556:26)
+    at SMTPConnection._processResponse (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:993:20)
+    at SMTPConnection._onData (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:774:14)
+    at SMTPConnection._onSocketData (/home/Projetos/Webmail/node_modules/nodemailer/lib/smtp-connection/index.js:195:44)
+    at TLSSocket.emit (node:events:519:28)
+    at addChunk (node:internal/streams/readable:559:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+    at Readable.push (node:internal/streams/readable:390:5) {
+  code: 'EAUTH',
+  response: '535 5.7.8 Error: authentication failed: ',
+  responseCode: 535,
+  command: 'AUTH PLAIN'
+}
+❌ SMTP sending failed: Invalid login: 535 5.7.8 Error: authentication failed:
+{ component: 'smtp-connection', sid: 'L6YdkOwlSQ', tnx: 'network' } Connection closed

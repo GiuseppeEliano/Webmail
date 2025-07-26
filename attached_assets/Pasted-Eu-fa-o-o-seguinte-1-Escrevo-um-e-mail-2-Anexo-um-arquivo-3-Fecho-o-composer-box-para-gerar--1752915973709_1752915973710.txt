@@ -1,0 +1,100 @@
+Eu faço o seguinte:
+1. Escrevo um e-mail.
+2. Anexo um arquivo
+3. Fecho o composer box para gerar um rascunho.
+
+Output:
+📧 Creating email with data: {
+  userId: 6,
+  folderId: 4,
+  messageId: 'draft-1752915647419',
+  subject: '',
+  body: '<p>hhh</p>',
+  fromAddress: 'aba@eliano.dev',
+  fromName: 'John Doe',
+  toAddress: '',
+  toName: null,
+  ccAddress: null,
+  bccAddress: null,
+  replyToAddress: null,
+  isRead: true,
+  isStarred: false,
+  isDraft: true,
+  hasAttachments: true,
+  attachments: '[{"filename":"Email Professora Cláudia.pdf","path":"1752915644284_Email Professora Cláudia.pdf","size":177346,"mimetype":"application/pdf"}]',
+  priority: 'normal',
+  tags: null
+}
+🔒 SANITIZE INPUT: {
+  attachments: '[{"filename":"Email Professora Cláudia.pdf","path":"1752915644284_Email Professora Cláudia.pdf","size":177346,"mimetype":"application/pdf"}]',
+  hasAttachments: undefined,
+  attachmentsType: 'string',
+  allKeys: [
+    'userId',        'folderId',
+    'messageId',     'fromAddress',
+    'fromName',      'toAddress',
+    'ccAddress',     'bccAddress',
+    'subject',       'body',
+    'attachments',   'isRead',
+    'isStarred',     'isDraft',
+    'isActiveDraft', 'priority'
+  ]
+}
+🔒 HTML content sanitized: {
+  originalLength: 10,
+  sanitizedLength: 10,
+  dangerousContentRemoved: false
+}
+🔒 SANITIZE OUTPUT: {
+  attachments: '[{"filename":"Email Professora Cláudia.pdf","path":"1752915644284_Email Professora Cláudia.pdf","size":177346,"mimetype":"application/pdf"}]',
+  hasAttachments: false,
+  attachmentsType: 'string'
+}
+🔒 Email data sanitized for security
+📧 Final sanitized email data before creation
+📧 createEmail called with isDraft: 1 messageId: draft-1752915647419
+📧 Updating existing active draft instead of creating new one
+📝 Updating email 340 - Original data: { subject: '...', body: '<p>hhh</p>...' }
+📎 ATTACHMENTS DEBUG - Update email input data: {
+  attachments: undefined,
+  hasAttachments: undefined,
+  attachmentsType: 'undefined'
+}
+📎 ATTACHMENTS DEBUG - Preserving hasAttachments flag: {
+  originalHasAttachments: undefined,
+  encryptedHasAttachments: undefined,
+  attachmentsLength: 0
+}
+🔐 Encrypted update data: {
+  subject: '...',
+  body: 'dWLCzT7PGlljOAbj8L7Z1WGWaEmQQs...',
+  attachments: undefined,
+  hasAttachments: undefined,
+  attachmentsType: 'undefined'
+}
+📎 CRITICAL - About to save to database: {
+  attachments: undefined,
+  attachmentsIsArray: false,
+  attachmentsIsNull: false,
+  attachmentsIsUndefined: true,
+  hasAttachments: undefined
+}
+🔓 Decrypted response data: { subject: '...', body: '<p>hhh</p>...' }
+📧 Email created successfully: 340
+
+
+Tudo certo! Nenhum erro. Porém, ao ir no banco de dados local do meu computador, vejo que o campo attachaments (que é um JSON) está NULL. Era pra estar algo como:
+
+[
+    {
+        "path": "1752741654518_Email Professora Cláudia.pdf",
+        "size": 177346,
+        "filename": "Email Professora Cláudia.pdf",
+        "mimetype": "application/pdf"
+    }
+]
+
+Mas está NULL...
+Note que eu estou no modo de PRODUÇÃO (não estou usando o arquivo /server/storage.ts)
+
+O que pode estar acontecendo?
