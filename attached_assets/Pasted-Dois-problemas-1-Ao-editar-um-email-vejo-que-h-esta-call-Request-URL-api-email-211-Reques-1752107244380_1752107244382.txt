@@ -1,0 +1,75 @@
+Dois problemas: 
+1. Ao editar um email, vejo que há esta call:
+Request URL: /api/email/211
+Request Method: PUT
+
+e depois:
+
+Request URL: /api/counts/6
+Request Method: GET
+
+A lista de emails não é atualizada com o conteudo do rascunho editado (Fui na pasta rascunhos, selecionei um rascunho e editei ele, e dai fechar o composer box clicando no close button (X) para atualizar o rascunho. Ele é atualizado no backend, mas na UI, só atualiza o conteudo na listagem se eu clicar no botão refresh ou atualizar a página pressionando F5. Não quero isso. Quero que, assim que editar o rascunho e fechar o composer box, a listagem se atualize). Você viu que há dusa calls na API após fechar o composer box, não tem como linkar nela para atualizar a listagem de forma dinamica?
+
+2.  Falta traduzir para inglês também:
+
+return (
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="text-4xl mb-4">📧</div>
+          <h3 className="text-lg font-medium mb-2">Nenhum email encontrado</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            {searchQuery
+              ? `Nenhum email corresponde a "${searchQuery}"`
+              : selectedTagFilter
+                ? "Nenhum email com a tag selecionada"
+                : filterBy !== "all"
+                  ? `Nenhum email ${filterBy === "unread" ? "não lido" : filterBy === "starred" ? "favorito" : filterBy === "attachments" ? "com anexos" : filterBy}`
+                  : `Nenhum email em ${currentFolder}`}
+          </p>
+          {hasActiveFilters && (
+            <Button
+              onClick={handleResetFilters}
+              variant="outline"
+              size="sm"
+              className="hover:bg-primary hover:text-primary-foreground transition-colors"
+            >
+              <X className="h-4 w-4 mr-2" />
+              Resetar Filtros
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+e:
+
+<DialogTitle>Selecionar Tag para Filtrar</DialogTitle>
+            <DialogDescription>
+              Escolha uma tag para filtrar os emails
+            </DialogDescription>
+
+E também, ao selecionar uma pasta e ela estiver vazia, aparece:
+
+
+Nenhum email encontrado
+e
+Nenhum email em {folderName}
+
+Traduzir também:
+
+Descartar Email
+Tem certeza de que deseja descartar este email? Esta ação não pode ser desfeita e o email não será salvo como rascunho.
+
+Cancelar
+Sim, Descartar
+
+
+
+Se for necessário, use REGEX para encontrar estes elementos.
+
+Deixar async: (com delay na hora de clicar em compose 1s)
+http://15.204.204.153:5000/api/drafts/active/6
+
+
+

@@ -1,0 +1,27 @@
+ Please select the mail server configuration type that best meets your needs.  │
+                                  │                                                                               │
+                                  │  No configuration:                                                            │
+                                  │   Should be chosen to leave the current configuration unchanged.              │
+                                  │  Internet site:                                                               │
+                                  │   Mail is sent and received directly using SMTP.                              │
+                                  │  Internet with smarthost:                                                     │
+                                  │   Mail is received directly using SMTP or by running a utility such           │
+                                  │   as fetchmail. Outgoing mail is sent using a smarthost.                      │
+                                  │  Satellite system:                                                            │
+                                  │   All mail is sent to another machine, called a 'smarthost', for              │
+                                  │   delivery.                                                                   │
+                                  │  Local only:                                                                  │
+                                  │   The only delivered mail is the mail for local users. There is no            │
+                                  │   network.                                                                    │
+                                  │                                                                               │
+                                  │ General mail configuration type:                                              │
+                                  │                                                                               │
+                                  │                           No configuration                                    │
+                                  │                           Internet Site                                       │
+                                  │                           Internet with smarthost                             │
+                                  │                           Satellite system                                    │
+                                  │                           Local only                                          │
+                                  │                                                                               │
+                                  │                                                                               │
+                                  │                     <Ok>                         <Cancel>                     │
+                                  │                                                            

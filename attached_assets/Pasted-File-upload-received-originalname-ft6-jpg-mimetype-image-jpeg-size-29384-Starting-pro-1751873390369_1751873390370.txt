@@ -1,0 +1,36 @@
+File upload received: { originalname: 'ft6.jpg', mimetype: 'image/jpeg', size: 29384 }
+Starting profile picture save from buffer for user: 6
+Image validation passed. Buffer size: 29384
+Generated filename: 6_1751873341591.jpg
+Saving to path: /home/Projetos/Webmail/user_storage/profiles/6_1751873341591.jpg
+Profile picture saved successfully
+Old profile picture cleaned up: undefined
+New profile picture saved: 6_1751873341591.jpg
+updateUser called with id: 6 data: { profilePicture: '/api/profile-picture/6/6_1751873341591.jpg' }
+Filtered update data: { profilePicture: '/api/profile-picture/6/6_1751873341591.jpg' }
+Executing update query...
+SQL Error in updateUser: Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'where `users`.`id` = 6' at line 1
+    at PromisePool.query (/home/Projetos/Webmail/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at MySql2PreparedQuery.execute (file:///home/Projetos/Webmail/node_modules/drizzle-orm/mysql2/session.js:51:32)
+    at QueryPromise.execute (file:///home/Projetos/Webmail/node_modules/drizzle-orm/mysql-core/query-builders/update.js:99:27)
+    at QueryPromise.then (file:///home/Projetos/Webmail/node_modules/drizzle-orm/query-promise.js:21:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+  code: 'ER_PARSE_ERROR',
+  errno: 1064,
+  sql: 'update `users` set  where `users`.`id` = 6',
+  sqlState: '42000',
+  sqlMessage: "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'where `users`.`id` = 6' at line 1"
+}
+Error uploading profile picture: Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'where `users`.`id` = 6' at line 1
+    at PromisePool.query (/home/Projetos/Webmail/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at MySql2PreparedQuery.execute (file:///home/Projetos/Webmail/node_modules/drizzle-orm/mysql2/session.js:51:32)
+    at QueryPromise.execute (file:///home/Projetos/Webmail/node_modules/drizzle-orm/mysql-core/query-builders/update.js:99:27)
+    at QueryPromise.then (file:///home/Projetos/Webmail/node_modules/drizzle-orm/query-promise.js:21:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+  code: 'ER_PARSE_ERROR',
+  errno: 1064,
+  sql: 'update `users` set  where `users`.`id` = 6',
+  sqlState: '42000',
+  sqlMessage: "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'where `users`.`id` = 6' at line 1"
+}
+7:29:01 AM [express] POST /api/user/6/profile-picture 500 in 146ms :: {"message":"You have an error …

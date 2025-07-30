@@ -1,0 +1,816 @@
+import { useState, useEffect, useRef } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  X,
+  Send,
+  Save,
+  Minimize,
+  Maximize,
+  Minus,
+  CloudUpload,
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  Link,
+  Code,
+  MoreHorizontal,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  List,
+  ListOrdered,
+  Quote,
+  Type,
+  Palette
+} from "lucide-react";
+import { useLanguage } from "@/hooks/use-language";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+const composeSchema = z.object({
+  to: z.string().email("Please enter a valid email address"),
+  cc: z.string().optional(),
+  bcc: z.string().optional(),
+  subject: z.string().optional(),
+  body: z.string().min(1, "Message body is required"),
+});
+
+type ComposeFormData = z.infer<typeof composeSchema>;
+
+interface ComposeModalProps {
+  onClose: () => void;
+  onSend: (emailData: ComposeFormData) => Promise<void>;
+  onSaveDraft?: (emailData: ComposeFormData) => Promise<void>;
+  replyTo?: { subject: string; to: string; body: string; cc?: string; bcc?: string };
+}
+
+export default function ComposeModal({ onClose, onSend, onSaveDraft, replyTo }: ComposeModalProps) {
+  const [isSending, setIsSending] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showNoSubjectConfirm, setShowNoSubjectConfirm] = useState(false);
+  const [pendingEmailData, setPendingEmailData] = useState<ComposeFormData | null>(null);
+  const [showBccField, setShowBccField] = useState(false);
+  const [showAdvancedToolbar, setShowAdvancedToolbar] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<string>("");
+  const autoSaveIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSavedDataRef = useRef<string>("");
+  const { t, currentLanguage } = useLanguage();
+  const isMobile = useIsMobile();
+
+  const form = useForm<ComposeFormData>({
+    resolver: zodResolver(composeSchema),
+    defaultValues: {
+      to: replyTo?.to || "",
+      cc: replyTo?.cc || "",
+      bcc: replyTo?.bcc || "",
+      subject: replyTo?.subject || "",
+      body: replyTo?.body || "",
+    },
+  });
+
+  // Check if there's any content to save
+  const hasContent = (data: ComposeFormData) => {
+    return !!(
+      data.to?.trim() ||
+      data.cc?.trim() ||
+      data.bcc?.trim() ||
+      data.subject?.trim() ||
+      data.body?.trim()
+    );
+  };
+
+  // Auto-save function
+  const autoSaveDraft = async () => {
+    if (!onSaveDraft) return;
+
+    const data = form.getValues();
+    if (!hasContent(data)) return;
+
+    // Check if data has changed since last save
+    const currentDataString = JSON.stringify(data);
+    if (currentDataString === lastSavedDataRef.current) return;
+
+    try {
+      setAutoSaveStatus("Saving...");
+      await onSaveDraft(data);
+      lastSavedDataRef.current = currentDataString;
+      setAutoSaveStatus("Draft saved");
+      
+      // Clear status after 2 seconds
+      setTimeout(() => setAutoSaveStatus(""), 2000);
+    } catch (error) {
+      console.error("Failed to auto-save draft:", error);
+      setAutoSaveStatus("Save failed");
+      setTimeout(() => setAutoSaveStatus(""), 3000);
+    }
+  };
+
+  // Auto-save effect - runs every 5 seconds
+  useEffect(() => {
+    if (!open) return;
+
+    // Clear any existing interval
+    if (autoSaveIntervalRef.current) {
+      clearInterval(autoSaveIntervalRef.current);
+    }
+
+    // Set up auto-save interval
+    autoSaveIntervalRef.current = setInterval(autoSaveDraft, 5000);
+
+    // Cleanup on unmount or when modal closes
+    return () => {
+      if (autoSaveIntervalRef.current) {
+        clearInterval(autoSaveIntervalRef.current);
+      }
+    };
+  }, [open, onSaveDraft]);
+
+  // Save draft when closing if there's content
+  useEffect(() => {
+    if (!open && onSaveDraft) {
+      const data = form.getValues();
+      if (hasContent(data)) {
+        autoSaveDraft();
+      }
+    }
+  }, [open]);
+
+  const handleSend = async (data: ComposeFormData) => {
+    // Check if subject is empty
+    if (!data.subject || data.subject.trim() === "") {
+      setPendingEmailData(data);
+      setShowNoSubjectConfirm(true);
+      return;
+    }
+
+    try {
+      setIsSending(true);
+      await onSend(data);
+      onClose();
+    } catch (error) {
+      console.error("Failed to send email:", error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleConfirmSendWithoutSubject = async () => {
+    if (!pendingEmailData) return;
+    
+    setIsSending(true);
+    setShowNoSubjectConfirm(false);
+    try {
+      // Auto-fill subject based on language
+      const noSubjectText = t('noSubject');
+      const emailDataWithSubject = {
+        ...pendingEmailData,
+        subject: noSubjectText
+      };
+      await onSend(emailDataWithSubject);
+      onClose();
+    } catch (error) {
+      console.error("Failed to send email:", error);
+    } finally {
+      setIsSending(false);
+      setPendingEmailData(null);
+    }
+  };
+
+  // Check if there's any content to save
+  const hasContent = (data: ComposeFormData) => {
+    return !!(
+      data.to?.trim() ||
+      data.cc?.trim() ||
+      data.bcc?.trim() ||
+      data.subject?.trim() ||
+      data.body?.trim()
+    );
+  };
+
+  // Auto-save function
+  const autoSaveDraft = async () => {
+    if (!onSaveDraft) return;
+
+    const data = form.getValues();
+    if (!hasContent(data)) return;
+
+    // Check if data has changed since last save
+    const currentDataString = JSON.stringify(data);
+    if (currentDataString === lastSavedDataRef.current) return;
+
+    try {
+      setAutoSaveStatus("Saving...");
+      await onSaveDraft(data);
+      lastSavedDataRef.current = currentDataString;
+      setAutoSaveStatus("Draft saved");
+      
+      // Clear status after 2 seconds
+      setTimeout(() => setAutoSaveStatus(""), 2000);
+    } catch (error) {
+      console.error("Failed to auto-save draft:", error);
+      setAutoSaveStatus("Save failed");
+      setTimeout(() => setAutoSaveStatus(""), 3000);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (onSaveDraft) {
+      try {
+        const data = form.getValues();
+        await onSaveDraft(data);
+        console.log("Draft saved successfully");
+      } catch (error) {
+        console.error("Failed to save draft:", error);
+      }
+    } else {
+      console.log("Save draft:", form.getValues());
+    }
+  };
+
+  const applyFormatting = (command: string, value?: string) => {
+    document.execCommand(command, false, value);
+  };
+
+  const insertLink = () => {
+    const url = prompt("Enter URL:");
+    if (url) {
+      applyFormatting('createLink', url);
+    }
+  };
+
+  const RichTextToolbar = () => (
+    <div className="border-b border-border bg-muted/30">
+      <div className="flex items-center p-2 gap-1 flex-wrap">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => applyFormatting('bold')}
+          className="h-8 w-8 p-0"
+          title="Bold"
+        >
+          <Bold className="h-3 w-3" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => applyFormatting('italic')}
+          className="h-8 w-8 p-0"
+          title="Italic"
+        >
+          <Italic className="h-3 w-3" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => applyFormatting('underline')}
+          className="h-8 w-8 p-0"
+          title="Underline"
+        >
+          <Underline className="h-3 w-3" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => applyFormatting('strikeThrough')}
+          className="h-8 w-8 p-0"
+          title="Strikethrough"
+        >
+          <Strikethrough className="h-3 w-3" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={insertLink}
+          className="h-8 w-8 p-0"
+          title="Insert Link"
+        >
+          <Link className="h-3 w-3" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => applyFormatting('insertHTML', '<code></code>')}
+          className="h-8 w-8 p-0"
+          title="Code"
+        >
+          <Code className="h-3 w-3" />
+        </Button>
+
+        {showAdvancedToolbar ? (
+          <>
+            <select
+              onChange={(e) => applyFormatting('formatBlock', e.target.value)}
+              className="h-8 px-2 text-xs border border-border rounded bg-background"
+              defaultValue=""
+            >
+              <option value="">Paragraph</option>
+              <option value="h1">Heading 1</option>
+              <option value="h2">Heading 2</option>
+              <option value="h3">Heading 3</option>
+            </select>
+            <select
+              onChange={(e) => applyFormatting('fontName', e.target.value)}
+              className="h-8 px-2 text-xs border border-border rounded bg-background"
+              defaultValue=""
+            >
+              <option value="">Font</option>
+              <option value="Arial">Arial</option>
+              <option value="Times">Times</option>
+              <option value="Courier">Courier</option>
+              <option value="Georgia">Georgia</option>
+            </select>
+            <select
+              onChange={(e) => applyFormatting('fontSize', e.target.value)}
+              className="h-8 px-2 text-xs border border-border rounded bg-background"
+              defaultValue=""
+            >
+              <option value="">Size</option>
+              <option value="1">8pt</option>
+              <option value="2">10pt</option>
+              <option value="3">12pt</option>
+              <option value="4">14pt</option>
+              <option value="5">18pt</option>
+              <option value="6">24pt</option>
+              <option value="7">36pt</option>
+            </select>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => applyFormatting('justifyLeft')}
+              className="h-8 w-8 p-0"
+              title="Align Left"
+            >
+              <AlignLeft className="h-3 w-3" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => applyFormatting('justifyCenter')}
+              className="h-8 w-8 p-0"
+              title="Align Center"
+            >
+              <AlignCenter className="h-3 w-3" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => applyFormatting('justifyRight')}
+              className="h-8 w-8 p-0"
+              title="Align Right"
+            >
+              <AlignRight className="h-3 w-3" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => applyFormatting('insertUnorderedList')}
+              className="h-8 w-8 p-0"
+              title="Bullet List"
+            >
+              <List className="h-3 w-3" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => applyFormatting('insertOrderedList')}
+              className="h-8 w-8 p-0"
+              title="Numbered List"
+            >
+              <ListOrdered className="h-3 w-3" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => applyFormatting('formatBlock', 'blockquote')}
+              className="h-8 w-8 p-0"
+              title="Quote"
+            >
+              <Quote className="h-3 w-3" />
+            </Button>
+            <input
+              type="color"
+              onChange={(e) => applyFormatting('foreColor', e.target.value)}
+              className="h-6 w-6 border border-border rounded cursor-pointer"
+              title="Text Color"
+            />
+            <input
+              type="color"
+              onChange={(e) => applyFormatting('backColor', e.target.value)}
+              className="h-6 w-6 border border-border rounded cursor-pointer"
+              title="Background Color"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowAdvancedToolbar(false)}
+              className="h-8 w-8 p-0"
+              title="Show less"
+            >
+              <Minus className="h-3 w-3" />
+            </Button>
+          </>
+        ) : (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowAdvancedToolbar(true)}
+            className="h-8 w-8 p-0"
+            title="More options"
+          >
+            <MoreHorizontal className="h-3 w-3" />
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+
+  if (isMinimized) {
+    return (
+      <div className="fixed bottom-4 right-4 z-50">
+        <Button
+          onClick={() => setIsMinimized(false)}
+          className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
+          title="Restore compose window"
+        >
+          New Message
+        </Button>
+      </div>
+    );
+  }
+
+  // Mobile: Use Dialog
+  if (isMobile) {
+    return (
+      <>
+        <Dialog open={true} onOpenChange={onClose}>
+          <DialogContent className="w-[95vw] h-[90vh] flex flex-col p-0 gap-0 [&>button]:hidden overflow-hidden">
+            <DialogHeader className="px-4 pt-4 pb-4 border-b border-border flex flex-row items-center justify-between space-y-0">
+              <DialogTitle className="text-lg font-semibold">{t('newMessage')}</DialogTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
+                title="Close"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogHeader>
+            <form onSubmit={form.handleSubmit(handleSend)} className="flex-1 flex flex-col">
+              <div className="p-4 space-y-4 flex-1">
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <Label htmlFor="to" className="text-sm font-medium text-foreground">
+                      {t('to')}
+                    </Label>
+                    <Input
+                      id="to"
+                      type="email"
+                      {...form.register("to")}
+                      className="mt-2"
+                      placeholder="recipient@example.com"
+                    />
+                    {form.formState.errors.to && (
+                      <p className="text-sm text-destructive mt-1">
+                        {form.formState.errors.to.message}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="cc" className="text-sm font-medium text-foreground">
+                      {t('cc')}
+                    </Label>
+                    <div className="flex items-center space-x-2 mt-2">
+                      <Input
+                        id="cc"
+                        type="email"
+                        {...form.register("cc")}
+                        className="flex-1"
+                        placeholder="cc@example.com"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowBccField(!showBccField)}
+                        className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
+                        title="Show BCC field"
+                      >
+                        :
+                      </Button>
+                    </div>
+                  </div>
+                  {showBccField && (
+                    <div>
+                      <Label htmlFor="bcc" className="text-sm font-medium text-foreground">
+                        {t('bcc')}
+                      </Label>
+                      <Input
+                        id="bcc"
+                        type="email"
+                        {...form.register("bcc")}
+                        className="mt-2"
+                        placeholder="bcc@example.com"
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <Label htmlFor="subject" className="text-sm font-medium text-foreground">
+                      {t('subject')}
+                    </Label>
+                    <Input
+                      id="subject"
+                      {...form.register("subject")}
+                      className="mt-2"
+                      placeholder="Email subject..."
+                    />
+                  </div>
+                </div>
+                <div className="border border-border rounded-lg overflow-hidden">
+                  <RichTextToolbar />
+                  <div
+                    contentEditable
+                    className="editor-content p-4 min-h-[150px] h-[20vh] focus:outline-none overflow-y-auto"
+                    data-placeholder="Compose your message..."
+                    onInput={(e) => {
+                      const content = e.currentTarget.innerHTML;
+                      form.setValue("body", content);
+                    }}
+                    dangerouslySetInnerHTML={{ __html: form.watch("body") || "" }}
+                  />
+                  {form.formState.errors.body && (
+                    <p className="text-sm text-destructive p-4 border-t border-border">
+                      {form.formState.errors.body.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="p-4 border-t border-border flex flex-col items-start justify-between gap-4">
+                <div className="flex items-center space-x-3 w-full">
+                  <Button
+                    type="submit"
+                    disabled={isSending}
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                  >
+                    {isSending ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        {t('sending')}
+                      </>
+                    ) : (
+                      <>
+                        <Send className="h-4 w-4 mr-2" />
+                        {t('send')}
+                      </>
+                    )}
+                  </Button>
+                  {autoSaveStatus && (
+                    <span className="text-sm text-muted-foreground">
+                      {autoSaveStatus}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* No Subject Confirmation Alert */}
+        <AlertDialog open={showNoSubjectConfirm} onOpenChange={setShowNoSubjectConfirm}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t('confirmSendWithoutSubject')}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t('noSubjectWarning')}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => {
+                setShowNoSubjectConfirm(false);
+                setPendingEmailData(null);
+              }}>
+                {t('cancel')}
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmSendWithoutSubject}>
+                {t('sendAnyway')}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </>
+    );
+  }
+
+  // Desktop: Fixed positioned window
+  return (
+    <>
+      <div className={`fixed bottom-0 right-0 z-50 bg-background border-l border-t border-border rounded-tl-lg shadow-xl ${
+        isExpanded ? 'w-[62.5vw] h-[100vh]' : 'w-[729px] h-[687px]'
+      } flex flex-col overflow-hidden`}>
+        {/* Header */}
+        <div className="px-4 pt-3 pb-3 border-b border-border flex flex-row items-center justify-between">
+          <h3 className="text-sm font-semibold">{t('newMessage')}</h3>
+          <div className="flex items-center space-x-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsMinimized(true)}
+              className="text-muted-foreground hover:text-foreground h-6 w-6 p-0"
+              title="Minimize compose window"
+            >
+              <Minus className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="text-muted-foreground hover:text-foreground h-6 w-6 p-0"
+              title={isExpanded ? "Restore window size" : "Expand window"}
+            >
+              {isExpanded ? <Minimize className="h-3 w-3" /> : <Maximize className="h-3 w-3" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="text-muted-foreground hover:text-foreground h-6 w-6 p-0"
+              title="Close"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={form.handleSubmit(handleSend)} className="flex-1 flex flex-col">
+          <div className="p-3 space-y-3 flex-1 overflow-y-auto">
+            <div>
+              <Input
+                type="email"
+                {...form.register("to")}
+                className="text-sm"
+                placeholder={t('to')}
+              />
+              {form.formState.errors.to && (
+                <p className="text-xs text-destructive mt-1">
+                  {form.formState.errors.to.message}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center space-x-2">
+              <Input
+                type="email"
+                {...form.register("cc")}
+                className="text-sm flex-1"
+                placeholder={t('cc')}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowBccField(!showBccField)}
+                className="text-muted-foreground hover:text-foreground h-8 w-8 p-0 text-xs"
+                title="Show BCC field"
+              >
+                :
+              </Button>
+            </div>
+            {showBccField && (
+              <div>
+                <Input
+                  type="email"
+                  {...form.register("bcc")}
+                  className="text-sm"
+                  placeholder={t('bcc')}
+                />
+              </div>
+            )}
+            <div>
+              <Input
+                {...form.register("subject")}
+                className="text-sm"
+                placeholder={t('subject')}
+              />
+            </div>
+            <div className="flex-1 border border-border rounded-lg overflow-hidden">
+              <RichTextToolbar />
+              <div
+                contentEditable
+                className="editor-content p-3 min-h-[200px] text-sm focus:outline-none overflow-y-auto"
+                style={{ maxHeight: '300px' }}
+                data-placeholder="Compose your message..."
+                onInput={(e) => {
+                  const content = e.currentTarget.innerHTML;
+                  form.setValue("body", content);
+                }}
+                dangerouslySetInnerHTML={{ __html: form.watch("body") || "" }}
+              />
+              {form.formState.errors.body && (
+                <p className="text-xs text-destructive p-3 border-t border-border">
+                  {form.formState.errors.body.message}
+                </p>
+              )}
+            </div>
+          </div>
+          
+          {/* Footer */}
+          <div className="p-3 border-t border-border flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Button
+                type="submit"
+                disabled={isSending}
+                size="sm"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                {isSending ? (
+                  <>
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                    {t('sending')}
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-3 w-3 mr-1" />
+                    {t('send')}
+                  </>
+                )}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleSaveDraft}
+              >
+                <Save className="h-3 w-3 mr-1" />
+                {t('saveDraft')}
+              </Button>
+            </div>
+            <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+              <CloudUpload className="h-3 w-3" />
+              <span>Auto-saved</span>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      {/* No Subject Confirmation Alert */}
+      <AlertDialog open={showNoSubjectConfirm} onOpenChange={setShowNoSubjectConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('confirmSendWithoutSubject')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('noSubjectWarning')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setShowNoSubjectConfirm(false);
+              setPendingEmailData(null);
+            }}>
+              {t('cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmSendWithoutSubject}>
+              {t('sendAnyway')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}

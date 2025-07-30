@@ -1,0 +1,168 @@
+📤 Sending email with data: {
+  userId: 6,
+  folderId: 0,
+  messageId: 'msg-1753911024685',
+  subject: 'anexo',
+  body: '<p>a</p><p>a</p><p>a</p><p>a</p><p>a</p><p>a</p><p>a</p><p>a</p><p>a</p><p>aa</p><p>a</p>',
+  fromAddress: 'aba@eliano.dev',
+  fromName: '',
+  toAddress: 'giusdadeppaeeliano@gmail.com',
+  toName: null,
+  ccAddress: null,
+  bccAddress: null,
+  hasAttachments: true,
+  attachments: '[{"filename":"Email Professora Cláudia.pdf","path":"1753910997078_Email Professora Cláudia.pdf","size":177346,"mimetype":"application/pdf"}]',
+  replyToAddress: null,
+  isRead: true,
+  isStarred: false,
+  isDraft: false,
+  priority: 'normal',
+  tags: null
+}
+🔒 HTML content sanitized: {
+  originalLength: 89,
+  sanitizedLength: 89,
+  dangerousContentRemoved: false
+}
+🔒 Email data sanitized for security
+📧 Final sanitized email data ready for sending
+📧 createEmail called with isDraft: 0 messageId: msg-1753911024685
+📧 Creating new email in database
+📎 ATTACHMENTS DEBUG - Input email data: {
+  attachments: '[{"filename":"Email Professora Cláudia.pdf","path":"1753910997078_Email Professora Cláudia.pdf","size":177346,"mimetype":"application/pdf"}]',
+  hasAttachments: undefined,
+  attachmentsType: 'string',
+  attachmentsContent: '[{"filename":"Email Professora Cláudia.pdf","path":"1753910997078_Email Professora Cláudia.pdf","siz...'
+}
+📎 ATTACHMENTS DEBUG - Processing attachments in encryption: {
+  originalAttachments: '[{"filename":"Email Professora Cláudia.pdf","path":"1753910997078_Email Professora Cláudia.pdf","size":177346,"mimetype":"application/pdf"}]',
+  originalType: 'string',
+  encryptedAttachments: [
+    {
+      filename: 'Email Professora Cláudia.pdf',
+      path: '1753910997078_Email Professora Cláudia.pdf',
+      size: 177346,
+      mimetype: 'application/pdf'
+    }
+  ],
+  encryptedType: 'object',
+  hasAttachments: 1,
+  attachmentsCount: 1
+}
+📎 ATTACHMENTS DEBUG - Preserving hasAttachments flag: {
+  originalHasAttachments: undefined,
+  encryptedHasAttachments: 1,
+  attachmentsLength: 1
+}
+📎 ATTACHMENTS DEBUG - Encrypted email data before DB insert: {
+  attachments: [
+    {
+      filename: 'Email Professora Cláudia.pdf',
+      path: '1753910997078_Email Professora Cláudia.pdf',
+      size: 177346,
+      mimetype: 'application/pdf'
+    }
+  ],
+  hasAttachments: 1,
+  attachmentsType: 'object'
+}
+📧 New email created with ID: 424
+📧 Email stored in database: 424
+📎 Raw emailData.attachments: {
+  hasAttachments: true,
+  isArray: false,
+  count: 140,
+  attachments: '[{"filename":"Email Professora Cláudia.pdf","path":"1753910997078_Email Professora Cláudia.pdf","size":177346,"mimetype":"application/pdf"}]'
+}
+📎 Final SMTP attachments prepared: { count: 0, attachments: [] }
+📧 Sending email via SMTP using user credentials: {
+  smtpAuthUser: 'aba@eliano.dev',
+  realSender: 'aba@eliano.dev',
+  recipient: 'giusdadeppaeeliano@gmail.com',
+  subject: 'anexo'
+}
+RAW SMTP_HOST: "secmail.eliano.dev"
+📧 Preparing to send email: {
+  from: 'aba@eliano.dev',
+  to: 'giusdadeppaeeliano@gmail.com',
+  subject: 'anexo',
+  hasAttachments: false,
+  hasInlineImages: false,
+  attachmentsCount: 0,
+  attachmentsData: []
+}
+🖼️ Extracted inline images from HTML: { found: 0, images: [] }
+🖼️ Processing inline images: {
+  inlineImagesCount: 0,
+  htmlLength: 89,
+  htmlSample: '<p>a</p><p>a</p><p>a</p><p>a</p><p>a</p><p>a</p><p>a</p><p>a</p><p>a</p><p>aa</p><p>a</p>...'
+}
+📧 Sending email with user credentials: {
+  smtpUser: 'aba@eliano.dev',
+  from: 'aba@eliano.dev',
+  to: 'giusdadeppaeeliano@gmail.com',
+  subject: 'anexo',
+  regularAttachments: [],
+  cidAttachments: [],
+  totalAttachments: 0
+}
+✅ Email sent successfully: <bd6211a8-a21f-210c-38b1-7c361cf12d37@eliano.dev>
+✅ Email sent via SMTP successfully: <bd6211a8-a21f-210c-38b1-7c361cf12d37@eliano.dev>
+📝 Updating email 424 - Original data: { subject: 'undefined...', body: 'undefined...' }
+📎 ATTACHMENTS DEBUG - Update email input data: {
+  attachments: undefined,
+  hasAttachments: undefined,
+  attachmentsType: 'undefined'
+}
+📎 ATTACHMENTS DEBUG - Raw database email data: {
+  rawAttachments: [
+    {
+      path: '1753910997078_Email Professora Cláudia.pdf',
+      size: 177346,
+      filename: 'Email Professora Cláudia.pdf',
+      mimetype: 'application/pdf'
+    }
+  ],
+  rawHasAttachments: undefined,
+  rawAttachmentsType: 'object'
+}
+📎 PRESERVING existing attachments from database: {
+  preservedAttachments: [
+    {
+      path: '1753910997078_Email Professora Cláudia.pdf',
+      size: 177346,
+      filename: 'Email Professora Cláudia.pdf',
+      mimetype: 'application/pdf'
+    }
+  ],
+  preservedHasAttachments: undefined
+}
+📎 ATTACHMENTS DEBUG - Processing attachments in encryption: {
+  originalAttachments: [
+    {
+      path: '1753910997078_Email Professora Cláudia.pdf',
+      size: 177346,
+      filename: 'Email Professora Cláudia.pdf',
+      mimetype: 'application/pdf'
+    }
+  ],
+  originalType: 'object',
+  encryptedAttachments: [
+    {
+      path: '1753910997078_Email Professora Cláudia.pdf',
+      size: 177346,
+      filename: 'Email Professora Cláudia.pdf',
+      mimetype: 'application/pdf'
+    }
+  ],
+  encryptedType: 'object',
+  hasAttachments: 1,
+  attachmentsCount: 1
+}
+📎 ATTACHMENTS DEBUG - Preserving hasAttachments flag: {
+  originalHasAttachments: undefined,
+  encryptedHasAttachments: 1,
+  attachmentsLength: 1
+}
+🔐 Encrypted update data: { subject: 'undefined...', body: 'undefined...' }
+🔓 Decrypted response data: { subject: 'anexo...', body: '<p>a</p><p>a</p><p>a</p><p>a</...' }

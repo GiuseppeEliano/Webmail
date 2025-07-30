@@ -1,0 +1,42 @@
+mysql> DESCRIBE users;
++-----------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| Field           | Type         | Null | Key | Default           | Extra                                         |
++-----------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| id              | int          | NO   | PRI | NULL              | auto_increment                                |
+| username        | varchar(50)  | NO   | UNI | NULL              |                                               |
+| email           | varchar(255) | NO   | UNI | NULL              |                                               |
+| password        | varchar(255) | NO   |     | NULL              |                                               |
+| firstName       | varchar(100) | YES  |     | NULL              |                                               |
+| lastName        | varchar(100) | YES  |     | NULL              |                                               |
+| profileImageUrl | varchar(500) | YES  |     | NULL              |                                               |
+| signature       | text         | YES  |     | NULL              |                                               |
+| storageUsed     | bigint       | YES  |     | 0                 |                                               |
+| storageQuota    | bigint       | YES  |     | 104857600         |                                               |
+| language        | varchar(10)  | YES  |     | pt                |                                               |
+| theme           | varchar(20)  | YES  |     | dark              |                                               |
+| avatarShape     | varchar(20)  | YES  |     | rounded           |                                               |
+| sidebarView     | varchar(20)  | YES  |     | expanded          |                                               |
+| createdAt       | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| updatedAt       | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++-----------------+--------------+------+-----+-------------------+-----------------------------------------------+
+16 rows in set (0.00 sec)
+
+mysql> INSERT INTO users (
+    ->     email,
+    ->     password,
+    ->     firstName,
+    ->     lastName,
+    ->     isActive,
+    ->     storageQuotaBytes,
+    ->     createdAt
+    -> ) VALUES (
+    ->     'noreply@eliano.dev',
+    ->     'smtp_password_123',
+    ->     'Sistema',
+    ->     'NoReply',
+    ->     1,
+    ->     1048576,
+    ->     NOW()
+    -> );
+ERROR 1054 (42S22): Unknown column 'isActive' in 'field list'
+mysql>

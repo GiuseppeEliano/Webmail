@@ -1,0 +1,131 @@
+Meu projeto esta todo funcional. Só que na hora de enviar um e-mail, aparece este erro:
+
+index-rN25spFp.js:671 Failed to send email: Error: 500: {"message":{"issues":[{"code":"invalid_type","expected":"number","received":"boolean","path":["isRead"],"message":"Expected number, received boolean"},{"code":"invalid_type","expected":"number","received":"boolean","path":["isStarred"],"message":"Expected number, received boolean"},{"code":"invalid_type","expected":"number","received":"boolean","path":["isDraft"],"message":"Expected number, received boolean"}],"name":"ZodError"}}
+
+
+Dados que são enviados:
+
+{
+    "userId": 6,
+    "folderId": 0,
+    "messageId": "msg-1751948422616",
+    "subject": "sadadada",
+    "body": "<p>addasda</p>",
+    "fromAddress": "aba@eliano.dev",
+    "fromName": "John Doe",
+    "toAddress": "adsd@asdad.com",
+    "toName": null,
+    "ccAddress": null,
+    "bccAddress": null,
+    "replyToAddress": null,
+    "isRead": true,
+    "isStarred": false,
+    "isDraft": false,
+    "hasAttachments": false,
+    "attachments": null,
+    "priority": "normal",
+    "tags": null
+}
+
+
+Response:
+{
+    "message": {
+        "issues": [
+            {
+                "code": "invalid_type",
+                "expected": "number",
+                "received": "boolean",
+                "path": [
+                    "isRead"
+                ],
+                "message": "Expected number, received boolean"
+            },
+            {
+                "code": "invalid_type",
+                "expected": "number",
+                "received": "boolean",
+                "path": [
+                    "isStarred"
+                ],
+                "message": "Expected number, received boolean"
+            },
+            {
+                "code": "invalid_type",
+                "expected": "number",
+                "received": "boolean",
+                "path": [
+                    "isDraft"
+                ],
+                "message": "Expected number, received boolean"
+            }
+        ],
+        "name": "ZodError"
+    }
+}
+
+
+Mas acho que sei o que está acontecendo.
+
+No meu banco de dados, tenho na tabela emails:
+mysql> DESCRIBE emails;
++---------------+-----------------------------+------+-----+-------------------+-----------------------------------------------+
+| Field         | Type                        | Null | Key | Default           | Extra                                         |
++---------------+-----------------------------+------+-----+-------------------+-----------------------------------------------+
+| id            | int                         | NO   | PRI | NULL              | auto_increment                                |
+| userId        | int                         | NO   | MUL | NULL              |                                               |
+| folderId      | int                         | NO   | MUL | NULL              |                                               |
+| messageId     | varchar(255)                | YES  | UNI | NULL              |                                               |
+| threadId      | varchar(255)                | YES  | MUL | NULL              |                                               |
+| fromAddress   | varchar(255)                | NO   | MUL | NULL              |                                               |
+| fromName      | varchar(255)                | YES  |     | NULL              |                                               |
+| toAddress     | text                        | NO   |     | NULL              |                                               |
+| ccAddress     | text                        | YES  |     | NULL              |                                               |
+| bccAddress    | text                        | YES  |     | NULL              |                                               |
+| subject       | varchar(255)                | NO   |     | NULL              |                                               |
+| body          | longtext                    | NO   |     | NULL              |                                               |
+| attachments   | json                        | YES  |     | NULL              |                                               |
+| isRead        | tinyint(1)                  | YES  | MUL | 0                 |                                               |
+| isStarred     | tinyint(1)                  | YES  | MUL | 0                 |                                               |
+| isDraft       | tinyint(1)                  | YES  | MUL | 0                 |                                               |
+| isActiveDraft | tinyint(1)                  | YES  |     | 0                 |                                               |
+| priority      | enum('low','normal','high') | YES  |     | normal            |                                               |
+| sentAt        | timestamp                   | YES  |     | NULL              |                                               |
+| receivedAt    | timestamp                   | YES  | MUL | NULL              |                                               |
+| createdAt     | timestamp                   | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| updatedAt     | timestamp                   | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++---------------+-----------------------------+------+-----+-------------------+-----------------------------------------------+
+
+Veja a função createActiveDraft() em server/storage-production-fixed-temp.ts, tem isto:
+
+const draftData = {
+      userId,
+      folderId: draftsFolderId, // Use static numeric ID for drafts folder
+      fromAddress: '',
+      toAddress: encryptEmail('', userId),
+      subject: encryptEmail('', userId),
+      body: encryptEmail('', userId),
+      isDraft: 1, // MySQL tinyint for boolean
+      isActiveDraft: 1, // MySQL tinyint for boolean
+      isRead: 0,
+      isStarred: 0
+    };
+
+Veja isRead: 0 e isStarred: 0, por exemplo.
+
+Ta usando 0 e 1. A solução é substituir os booleans (true/false) no backend do código para:
+
+Tabela aliases:
+isActive
+
+Tabela emails:
+isRead
+isStarred
+isDraft
+isActiveDraft
+
+Tabela users:
+stayLoggedIn
+
+Ou seja, o que mandei acima onde tiver boolean (true/false) no código, bote para ser 0 ou 1, dai o código vai funcionar! Especifiquei quais tabelas e os atributos do banco de dados usam boolean, só adaptar, por favor.
+

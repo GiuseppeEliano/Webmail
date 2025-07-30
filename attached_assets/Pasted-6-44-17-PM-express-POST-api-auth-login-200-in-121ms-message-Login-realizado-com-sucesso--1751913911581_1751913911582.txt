@@ -1,0 +1,40 @@
+6:44:17 PM [express] POST /api/auth/login 200 in 121ms :: {"message":"Login realizado com sucesso","…
+Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client
+    at ServerResponse.setHeader (node:_http_outgoing:655:11)
+    at ServerResponse.header (/home/Projetos/Webmail/node_modules/express/lib/response.js:794:10)
+    at ServerResponse.send (/home/Projetos/Webmail/node_modules/express/lib/response.js:174:12)
+    at ServerResponse.json (/home/Projetos/Webmail/node_modules/express/lib/response.js:278:15)
+    at res.json (file:///home/Projetos/Webmail/dist/index.js:4642:28)
+    at file:///home/Projetos/Webmail/dist/index.js:4664:24
+    at Layer.handle_error (/home/Projetos/Webmail/node_modules/express/lib/router/layer.js:71:5)
+    at trim_prefix (/home/Projetos/Webmail/node_modules/express/lib/router/index.js:326:13)
+    at /home/Projetos/Webmail/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/home/Projetos/Webmail/node_modules/express/lib/router/index.js:346:12)
+Error: Unknown column 'data' in 'field list'
+    at PromisePool.query (/home/Projetos/Webmail/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at /home/Projetos/Webmail/node_modules/express-mysql-session/index.js:384:30
+    at new Promise (<anonymous>)
+    at MySQLStore.query (/home/Projetos/Webmail/node_modules/express-mysql-session/index.js:381:10)
+    at /home/Projetos/Webmail/node_modules/express-mysql-session/index.js:170:16
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error: Unknown column 'data' in 'field list'
+    at PromisePool.query (/home/Projetos/Webmail/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at /home/Projetos/Webmail/node_modules/express-mysql-session/index.js:384:30
+    at new Promise (<anonymous>)
+    at MySQLStore.query (/home/Projetos/Webmail/node_modules/express-mysql-session/index.js:381:10)
+    at /home/Projetos/Webmail/node_modules/express-mysql-session/index.js:170:16
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error: Unknown column 'data' in 'field list'
+    at PromisePool.query (/home/Projetos/Webmail/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at /home/Projetos/Webmail/node_modules/express-mysql-session/index.js:384:30
+    at new Promise (<anonymous>)
+    at MySQLStore.query (/home/Projetos/Webmail/node_modules/express-mysql-session/index.js:381:10)
+    at /home/Projetos/Webmail/node_modules/express-mysql-session/index.js:170:16
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error: Unknown column 'data' in 'field list'
+    at PromisePool.query (/home/Projetos/Webmail/node_modules/mysql2/lib/promise/pool.js:36:22)
+    at /home/Projetos/Webmail/node_modules/express-mysql-session/index.js:384:30
+    at new Promise (<anonymous>)
+    at MySQLStore.query (/home/Projetos/Webmail/node_modules/express-mysql-session/index.js:381:10)
+    at /home/Projetos/Webmail/node_modules/express-mysql-session/index.js:170:16
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)

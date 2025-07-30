@@ -1,0 +1,93 @@
+Ao fazer login:
+
+Auth verify - Session ID: tRbjQquvTPUoLWcPNf29su-uwPrETm0I
+🔍 Auth verify - Session data: Session {
+  cookie: {
+    path: '/',
+    _expires: 2025-07-07T07:35:38.607Z,
+    originalMaxAge: 86400000,
+    httpOnly: true,
+    secure: false,
+    sameSite: 'lax'
+  }
+}
+🔍 Auth verify - Session user: undefined
+❌ No session user found
+7:35:38 AM [express] GET /api/auth/verify 401 in 7ms :: {"message":"Not authenticated"}
+7:35:38 AM [express] GET /api/health 200 in 7ms :: {"status":"ok","timestamp":"2025-07-06T07:35:38.7…
+🔍 DEBUG LOGIN: { email: 'aba@eliano.dev', passwordLength: 9 }
+👤 User found: ID: 6, Email: aba@eliano.dev
+🔍 verifyPassword DEBUG: {
+  userId: 6,
+  passwordLength: 9,
+  hashedPasswordPrefix: '$2b$10$aOh...',
+  hashedPasswordLength: 60
+}
+🔐 bcrypt.compare result: true
+🔑 Password verification: VALID
+🔧 Session before creating: undefined
+🔧 Session after creating: {
+  id: 6,
+  username: 'aba',
+  email: 'aba@eliano.dev',
+  firstName: 'teste',
+  lastName: 'xa'
+}
+🔧 Session ID: tRbjQquvTPUoLWcPNf29su-uwPrETm0I
+
+
+
+Nada aconteceu com a pagina, mas dei F5:
+
+7:36:20 AM [express] GET /api/auth/verify 304 in 3ms :: {"authenticated":true,"user":{"id":6,"userna…
+7:36:20 AM [express] GET /api/health 200 in 2ms :: {"status":"ok","timestamp":"2025-07-06T07:36:20.1…
+🔍 Auth verify - Session ID: tRbjQquvTPUoLWcPNf29su-uwPrETm0I
+🔍 Auth verify - Session data: Session {
+  cookie: {
+    path: '/',
+    _expires: 2025-07-07T07:36:20.240Z,
+    originalMaxAge: 86400000,
+    httpOnly: true,
+    secure: false,
+    sameSite: 'lax'
+  },
+  user: {
+    id: 6,
+    username: 'aba',
+    email: 'aba@eliano.dev',
+    firstName: 'teste',
+    lastName: 'xa'
+  }
+}
+🔍 Auth verify - Session user: {
+  id: 6,
+  username: 'aba',
+  email: 'aba@eliano.dev',
+  firstName: 'teste',
+  lastName: 'xa'
+}
+✅ Session user found: {
+  id: 6,
+  username: 'aba',
+  email: 'aba@eliano.dev',
+  firstName: 'teste',
+  lastName: 'xa'
+}
+7:36:20 AM [express] GET /api/auth/verify 304 in 4ms :: {"authenticated":true,"user":{"id":6,"userna…
+
+
+
+E a página aparece "Loading...", some em 0.5s e fica escura (com a cor de fundo do tema escuro, sabe?)
+E no console:
+
+Error: Minified React error #310; visit https://reactjs.org/docs/error-decoder.html?invariant=310 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at Hr (index-D74y35jv.js:38:17615)
+    at Lf (index-D74y35jv.js:38:20561)
+    at Object.Pg [as useEffect] (index-D74y35jv.js:38:20819)
+    at Ve.useEffect (index-D74y35jv.js:9:5880)
+    at ER (index-D74y35jv.js:48:40799)
+    at AR (index-D74y35jv.js:48:41482)
+    at Wt (index-D74y35jv.js:48:42320)
+    at gK (index-D74y35jv.js:676:171866)
+    at Hu (index-D74y35jv.js:676:179378)
+    at Ag (index-D74y35jv.js:38:17018)

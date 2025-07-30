@@ -1,0 +1,21 @@
+chunk-RPCDYKBN.js?v=5de6dab2:521 Warning: findDOMNode is deprecated and will be removed in the next major release. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node
+    at ReactQuill2 (https://576c7d17-e981-47be-81ba-705d92a3d0ad-00-2i3wbdp1ajotj.worf.replit.d…unner/workspace/node_modules/.vite/deps/react-quill.js?v=5de6dab2:12915:30)
+    at div
+    at div
+    at div
+    at div
+    at form
+    at div
+    at ComposeModal (https://576c7d17-e981-47be-81ba-705d92a3d0ad-00-2i3wbdp1ajotj.worf.replit.dev/src/components/compose-modal.tsx:106:40)
+    at div
+    at Inbox (https://576c7d17-e981-47be-81ba-705d92a3d0ad-00-2i3wbdp1ajotj.worf.replit.dev/src/pages/inbox.tsx:36:35)
+    at Route (https://576c7d17-e981-47be-81ba-705d92a3d0ad-00-2i3wbdp1ajotj.worf.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=5de6dab2:265:16)
+    at Switch (https://576c7d17-e981-47be-81ba-705d92a3d0ad-00-2i3wbdp1ajotj.worf.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=5de6dab2:321:17)
+    at Router
+    at div
+    at Provider (https://576c7d17-e981-47be-81ba-705d92a3d0ad-00-2i3wbdp1ajotj.worf.replit.d…unner/workspace/node_modules/.vite/deps/chunk-E7IAXTU4.js?v=5de6dab2:38:15)
+    at TooltipProvider (https://576c7d17-e981-47be-81ba-705d92a3d0ad-00-2i3wbdp1ajotj.worf.replit.d…rkspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=5de6dab2:60:5)
+    at QueryClientProvider (https://576c7d17-e981-47be-81ba-705d92a3d0ad-00-2i3wbdp1ajotj.worf.replit.d…rkspace/node_modules/.vite/deps/@tanstack_react-query.js?v=5de6dab2:2805:3)
+    at App (https://576c7d17-e981-47be-81ba-705d92a3d0ad-00-2i3wbdp1ajotj.worf.replit.dev/src/App.tsx?v=4v56hAsPRdsZfKHSoakRf:51:3)
+
+react-quill.js?v=5de6dab2:5662 [Deprecation] Listener added for a 'DOMNodeInserted' mutation event. Support for this event type has been removed, and this event will no longer be fired. See https://chromestatus.com/feature/5083947249172480 for more information.
